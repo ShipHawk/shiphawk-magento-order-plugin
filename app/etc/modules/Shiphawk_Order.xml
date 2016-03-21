@@ -1,0 +1,12 @@
+<?xml version="1.0"?>
+<config>
+    <modules>
+        <Shiphawk_Order>
+            <active>true</active>
+            <codePool>community</codePool>
+            <depends>
+                <Mage_Sales />
+            </depends>
+        </Shiphawk_Order>
+    </modules>
+</config>
