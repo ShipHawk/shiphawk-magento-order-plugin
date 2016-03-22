@@ -31,11 +31,20 @@
                 <observers>
                     <shiphawk_order_order_place>
                         <type>singleton</type>
-                        <class>shiphawk_order/observer</class>
-                        <method>pushOrder</method>
+                        <class>shiphawk_order/observer_order</class>
+                        <method>push</method>
                     </shiphawk_order_order_place>
                 </observers>
             </sales_order_place_after>
+            <admin_system_config_changed_section_shiphawk>
+                <observers>
+                    <shiphawk_order_sytem_config_changed>
+                        <type>singleton</type>
+                        <class>shiphawk_order/observer_config</class>
+                        <method>check</method>
+                    </shiphawk_order_sytem_config_changed>
+                </observers>
+            </admin_system_config_changed_section_shiphawk>
         </events>
     </global>
     <default>
@@ -67,4 +76,16 @@
             </resources>
         </acl>
     </adminhtml>
+    <crontab>
+        <jobs>
+            <shiphawk_order_procces_14days>
+                <schedule>
+                    <cron_expr>0 0 * * *</cron_expr>
+                </schedule>
+                <run>
+                    <model>shiphawk_order/cron_processOrderForLast14Days::run</model>
+                </run>
+            </shiphawk_order_procces_14days>
+        </jobs>
+    </crontab>
 </config>

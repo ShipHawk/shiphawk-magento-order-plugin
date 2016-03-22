@@ -1,19 +1,12 @@
 <?php
 
-class Shiphawk_Order_Model_Observer
+class Shiphawk_Order_Model_Command_SendOrder
 {
-    public function pushOrder($observer)
+    public function execute(Mage_Sales_Model_Order $order)
     {
-        if (Mage::getStoreConfig('shiphawk/order/active') != 1) {
-            return ;
-        }
-
         $url = Mage::getStoreConfig('shiphawk/order/gateway_url');
         $key = Mage::getStoreConfig('shiphawk/order/api_key');
         $client = new Zend_Http_Client($url . 'orders?api_key=' . $key);
-
-        /** @var Mage_Sales_Model_Order $order */
-        $order = $observer->getOrder();
 
         $itemsRequest = [];
         foreach ($order->getAllItems() as $item) {
@@ -57,10 +50,10 @@ class Shiphawk_Order_Model_Observer
         $client->setRawData($orderRequest, 'application/json');
         try {
             $response = $client->request(Zend_Http_Client::POST);
+            Mage::log('ShipHawk Response: ' . var_export($response, true), Zend_Log::INFO, 'shiphawk_order.log');
         } catch (Exception $e) {
             Mage::logException($e);
         }
-        Mage::log('ShipHawk Response: ' . var_export($response, true), Zend_Log::INFO, 'shiphawk_order.log');
     }
 
     protected function statusMap($status)
