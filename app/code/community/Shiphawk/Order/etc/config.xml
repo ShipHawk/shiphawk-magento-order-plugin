@@ -80,7 +80,7 @@
         <jobs>
             <shiphawk_order_procces_14days>
                 <schedule>
-                    <cron_expr>0 0 * * *</cron_expr>
+                    <cron_expr>* * */1 * *</cron_expr>
                 </schedule>
                 <run>
                     <model>shiphawk_order/cron_processOrderForLast14Days::run</model>

@@ -12,12 +12,12 @@ class Shiphawk_Order_Model_Command_CheckConfiguration
 
         if ($response->isSuccessful()) {
             Mage::getSingleton('adminhtml/session')
-                ->addSuccess(Mage::helper('adminhtml')->__('Your account successfully linked.'));
-            Mage::getConfig()->setNode('shiphawk/order/status', 1);
+                ->addSuccess(Mage::helper('shiphawk_order')->__('Your account successfully linked.'));
+            Mage::getConfig()->saveConfig('shiphawk/order/status', 1);
         } else {
             Mage::getSingleton('adminhtml/session')
-                ->addError(Mage::helper('adminhtml')->__('Unable to authenticate API key.'));
-            Mage::getConfig()->setNode('shiphawk/order/status', 0);
+                ->addError(Mage::helper('shiphawk_order')->__('Unable to authenticate API key.'));
+            Mage::getConfig()->saveConfig('shiphawk/order/status', 0);
         }
     }
 }

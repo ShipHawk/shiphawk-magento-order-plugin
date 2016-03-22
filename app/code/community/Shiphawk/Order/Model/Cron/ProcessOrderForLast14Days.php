@@ -14,11 +14,11 @@ class Shiphawk_Order_Model_Cron_ProcessOrderForLast14Days
 
         $orders = Mage::getSingleton('sales/order')->getCollection()->addAttributeToFilter(
             'created_at',
-            ['lt' => strtotime('now - 14 days')]
-        )->load();
+            ['gt' => strtotime('now - 14 days')]
+        );
 
         foreach ($orders as $order) {
-            Mage::getSingleton('shiphawk_order/sendOrderCommand')->execute($order);
+            Mage::getSingleton('shiphawk_order/command_sendOrder')->execute($order);
         }
         Mage::getConfig()->saveConfig($key, 1);
     }

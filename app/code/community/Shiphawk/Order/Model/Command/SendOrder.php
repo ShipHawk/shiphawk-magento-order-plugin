@@ -30,7 +30,7 @@ class Shiphawk_Order_Model_Command_SendOrder
 
         $orderRequest = json_encode(
             array(
-                'order_number' => $order->getId(),
+                'order_number' => $order->getEntityId(),
                 'source_system' => 'magento',
                 'source_system_id' => $order->getStoreId(),
                 'source_system_processed_at' => '',
@@ -46,11 +46,11 @@ class Shiphawk_Order_Model_Command_SendOrder
             )
         );
 
-        Mage::log('ShipHawk Request: ' . $orderRequest, Zend_Log::INFO, 'shiphawk_order.log');
+        Mage::log('ShipHawk Request: ' . $orderRequest, Zend_Log::INFO, 'shiphawk_order.log', true);
         $client->setRawData($orderRequest, 'application/json');
         try {
             $response = $client->request(Zend_Http_Client::POST);
-            Mage::log('ShipHawk Response: ' . var_export($response, true), Zend_Log::INFO, 'shiphawk_order.log');
+            Mage::log('ShipHawk Response: ' . var_export($response, true), Zend_Log::INFO, 'shiphawk_order.log', true);
         } catch (Exception $e) {
             Mage::logException($e);
         }
@@ -66,7 +66,7 @@ class Shiphawk_Order_Model_Command_SendOrder
             case 'Pending':
                 return 'Open';
             default:
-                return 'N/A';
+                return 'Open';
         }
     }
 
@@ -78,7 +78,7 @@ class Shiphawk_Order_Model_Command_SendOrder
             case 'Processing':
                 return 'Partially Fufilled';
             default:
-                return 'N/A';
+                return 'Partially Fufilled';
         }
     }
 
