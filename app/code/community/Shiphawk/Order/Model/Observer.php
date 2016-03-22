@@ -29,18 +29,18 @@ class Shiphawk_Order_Model_Observer
                 'height' => $item->getHeight(),
                 'weight' => $item->getWeight(),
                 'item_type' => $item->getProductType(),
-                'unpacked_item_type_id' => '', //todo
-                'handling_unit_type' => '', //todo
-                'hs_code' => '', //todo
+                'unpacked_item_type_id' => 0,
+                'handling_unit_type' => '',
+                'hs_code' => '',
             );
         }
 
         $orderRequest = json_encode(
             array(
-                'order_number' => $order->getIncrementId(),
-                'source_system' => 'Magento',
-                'source_system_id' => $order->getId(),
-                'source_system_processed_at' => $order->getCreatedAt(),
+                'order_number' => $order->getId(),
+                'source_system' => 'magento',
+                'source_system_id' => $order->getStoreId(),
+                'source_system_processed_at' => '',
                 'origin_address' => $this->prepareAddress($order->getBillingAddress()),
                 'destination_address' => $this->prepareAddress($order->getShippingAddress()),
                 'order_line_items' => $itemsRequest,
@@ -48,9 +48,11 @@ class Shiphawk_Order_Model_Observer
                 'shipping_price' => $order->getShippingAmount(),
                 'tax_price' => $order->getTaxAmount(),
                 'items_price' => $order->getSubtotal(),
-                'status' => $order->getStatus(),
+                'status' => $this->statusMap($order->getStatus()),
+                'fulfillment_status' => $this->fulfillmentStatusMap($order->getStatus()),
             )
         );
+
         Mage::log('ShipHawk Request: ' . $orderRequest, Zend_Log::INFO, 'shiphawk_order.log');
         $client->setRawData($orderRequest, 'application/json');
         try {
@@ -61,7 +63,33 @@ class Shiphawk_Order_Model_Observer
         Mage::log('ShipHawk Response: ' . var_export($response, true), Zend_Log::INFO, 'shiphawk_order.log');
     }
 
-    public function prepareAddress(Mage_Sales_Model_Order_Address $address)
+    protected function statusMap($status)
+    {
+        switch ($status) {
+            case 'Canceled':
+                return 'Canceled';
+            case 'Complete':
+                return 'Closed';
+            case 'Pending':
+                return 'Open';
+            default:
+                return 'N/A';
+        }
+    }
+
+    protected function fulfillmentStatusMap($status)
+    {
+        switch ($status) {
+            case 'Complete':
+                return 'Fulfilled';
+            case 'Processing':
+                return 'Partially Fufilled';
+            default:
+                return 'N/A';
+        }
+    }
+
+    protected function prepareAddress(Mage_Sales_Model_Order_Address $address)
     {
         return array(
             'name' => $address->getFirstname() . ' '
