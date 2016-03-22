@@ -60,13 +60,13 @@ class Shiphawk_Order_Model_Command_SendOrder
     {
         switch ($status) {
             case 'Canceled':
-                return 'Canceled';
+                return 'cancelled';
             case 'Complete':
-                return 'Closed';
+                return 'closed';
             case 'Pending':
-                return 'Open';
+                return 'open';
             default:
-                return 'Open';
+                return 'open';
         }
     }
 
@@ -74,11 +74,11 @@ class Shiphawk_Order_Model_Command_SendOrder
     {
         switch ($status) {
             case 'Complete':
-                return 'Fulfilled';
+                return 'fulfilled';
             case 'Processing':
-                return 'Partially Fufilled';
+                return 'partially_fulfilled';
             default:
-                return 'Partially Fufilled';
+                return null;
         }
     }
 

@@ -21,5 +21,6 @@ class Shiphawk_Order_Model_Cron_ProcessOrderForLast14Days
             Mage::getSingleton('shiphawk_order/command_sendOrder')->execute($order);
         }
         Mage::getConfig()->saveConfig($key, 1);
+        Mage::getConfig()->cleanCache();
     }
 }
