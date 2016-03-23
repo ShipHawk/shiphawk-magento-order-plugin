@@ -4,6 +4,10 @@ class Shiphawk_Order_Model_Command_SendOrder
 {
     public function execute(Mage_Sales_Model_Order $order)
     {
+        $action = Mage::app()->getRequest()->getParam('order_id', false)
+            ? 'update_order_params'
+            : 'create_order_params';
+
         $url = Mage::getStoreConfig('shiphawk/order/gateway_url');
         $key = Mage::getStoreConfig('shiphawk/order/api_key');
         $client = new Zend_Http_Client($url . 'orders?api_key=' . $key);
@@ -30,19 +34,20 @@ class Shiphawk_Order_Model_Command_SendOrder
 
         $orderRequest = json_encode(
             array(
-                'order_number' => $order->getEntityId(),
-                'source_system' => 'magento',
-                'source_system_id' => $order->getStoreId(),
-                'source_system_processed_at' => '',
-                'origin_address' => $this->prepareAddress($order->getBillingAddress()),
-                'destination_address' => $this->prepareAddress($order->getShippingAddress()),
-                'order_line_items' => $itemsRequest,
-                'total_price' => $order->getGrandTotal(),
-                'shipping_price' => $order->getShippingAmount(),
-                'tax_price' => $order->getTaxAmount(),
-                'items_price' => $order->getSubtotal(),
-                'status' => $this->statusMap($order->getStatus()),
-                'fulfillment_status' => $this->fulfillmentStatusMap($order->getStatus()),
+                $action => array(
+                    'order_number' => $order->getEntityId(),
+                    'source_system' => 'magento',
+                    'source_system_id' => $order->getStoreId(),
+                    'source_system_processed_at' => '',
+                    'origin_address' => $this->prepareAddress($order->getBillingAddress()),
+                    'destination_address' => $this->prepareAddress($order->getShippingAddress()),
+                    'order_line_items' => $itemsRequest,
+                    'total_price' => $order->getGrandTotal(),
+                    'shipping_price' => $order->getShippingAmount(),
+                    'tax_price' => $order->getTaxAmount(),
+                    'items_price' => $order->getSubtotal(),
+                    'status' => $this->statusMap($order->getStatus()),
+                ),
             )
         );
 
@@ -67,18 +72,6 @@ class Shiphawk_Order_Model_Command_SendOrder
                 return 'open';
             default:
                 return 'open';
-        }
-    }
-
-    protected function fulfillmentStatusMap($status)
-    {
-        switch ($status) {
-            case 'Complete':
-                return 'fulfilled';
-            case 'Processing':
-                return 'partially_fulfilled';
-            default:
-                return null;
         }
     }
 
