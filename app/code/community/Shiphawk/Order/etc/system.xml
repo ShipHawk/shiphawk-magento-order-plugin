@@ -52,7 +52,7 @@
                         </gateway_url>
                         <register translate="label">
                             <label>Register on ShipHawk.com</label>
-                            <link>https://shiphawk.com/register</link>
+                            <link>https://shiphawk.com/reg/?p=basic</link>
                             <frontend_type>text</frontend_type>
                             <frontend_model>shiphawk_order/system_link</frontend_model>
                             <sort_order>30</sort_order>

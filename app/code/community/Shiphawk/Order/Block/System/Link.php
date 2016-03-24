@@ -4,6 +4,6 @@ class Shiphawk_Order_Block_System_Link extends Mage_Adminhtml_Block_System_Confi
 {
     public function render(Varien_Data_Form_Element_Abstract $element)
     {
-        return "<a href=\"{$element->getLink()}\">{$element->getLabel()}</a>";
+        return "<a target=\"_blank\" href=\"{$element->getOriginalData('link')}\">{$element->getLabel()}</a>";
     }
 }
