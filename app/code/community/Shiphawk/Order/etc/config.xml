@@ -6,6 +6,11 @@
         </Shiphawk_Order>
     </modules>
     <global>
+        <blocks>
+            <shiphawk_order>
+                <class>Shiphawk_Order_Block</class>
+            </shiphawk_order>
+        </blocks>
         <models>
             <shiphawk_order>
                 <class>Shiphawk_Order_Model</class>

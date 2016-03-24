@@ -67,11 +67,11 @@ class Shiphawk_Order_Model_Command_SendOrder
             case 'Canceled':
                 return 'cancelled';
             case 'Complete':
-                return 'closed';
+                return 'delivered';
             case 'Pending':
-                return 'open';
+                return 'new';
             default:
-                return 'open';
+                return 'new';
         }
     }
 
