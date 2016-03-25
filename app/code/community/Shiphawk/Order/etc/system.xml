@@ -52,7 +52,7 @@
                         </gateway_url>
                         <register translate="label">
                             <label>Register on ShipHawk.com</label>
-                            <link>https://shiphawk.com/reg/?p=basic</link>
+                            <link><![CDATA[https://shiphawk.com/reg/?p=basic&utm_medium=product&utm_source=magento&utm_campaign=connectpage]]></link>
                             <frontend_type>text</frontend_type>
                             <frontend_model>shiphawk_order/system_link</frontend_model>
                             <sort_order>30</sort_order>
