@@ -4,10 +4,6 @@ class Shiphawk_Order_Model_Command_SendOrder
 {
     public function execute(Mage_Sales_Model_Order $order)
     {
-        $action = Mage::app()->getRequest()->getParam('order_id', false)
-            ? 'update_order_params'
-            : 'create_order_params';
-
         $url = Mage::getStoreConfig('shiphawk/order/gateway_url');
         $key = Mage::getStoreConfig('shiphawk/order/api_key');
         $client = new Zend_Http_Client($url . 'orders?api_key=' . $key);
@@ -34,20 +30,18 @@ class Shiphawk_Order_Model_Command_SendOrder
 
         $orderRequest = json_encode(
             array(
-                $action => array(
-                    'order_number' => $order->getEntityId(),
-                    'source_system' => 'magento',
-                    'source_system_id' => $order->getStoreId(),
-                    'source_system_processed_at' => '',
-                    'origin_address' => $this->prepareAddress($order->getBillingAddress()),
-                    'destination_address' => $this->prepareAddress($order->getShippingAddress()),
-                    'order_line_items' => $itemsRequest,
-                    'total_price' => $order->getGrandTotal(),
-                    'shipping_price' => $order->getShippingAmount(),
-                    'tax_price' => $order->getTaxAmount(),
-                    'items_price' => $order->getSubtotal(),
-                    'status' => $this->statusMap($order->getStatus()),
-                ),
+                'order_number' => $order->getIncrementId(),
+                'source_system' => 'magento',
+                'source_system_id' => $order->getEntityId(),
+                'source_system_processed_at' => '',
+                'origin_address' => $this->getOriginAddress(),
+                'destination_address' => $this->prepareAddress($order->getShippingAddress()),
+                'order_line_items' => $itemsRequest,
+                'total_price' => $order->getGrandTotal(),
+                'shipping_price' => $order->getShippingAmount(),
+                'tax_price' => $order->getTaxAmount(),
+                'items_price' => $order->getSubtotal(),
+                'status' => $this->statusMap($order->getStatus()),
             )
         );
 
@@ -91,6 +85,20 @@ class Shiphawk_Order_Model_Command_SendOrder
             'zip'  => $address->getPostcode(),
             'email' => $address->getEmail(),
             'code'  => $address->getAddressType(),
+        );
+    }
+
+    protected function getOriginAddress()
+    {
+        return array(
+            'street1' => Mage::getStoreConfig('shipping/origin/street_line1'),
+            'street2' => Mage::getStoreConfig('shipping/origin/street_line2'),
+            'city' => Mage::getStoreConfig('shipping/origin/city'),
+            'state' => Mage::getModel('directory/region')
+                ->load(Mage::getStoreConfig('shipping/origin/region_id'))
+                ->getCode(),
+            'country' => Mage::getStoreConfig('shipping/origin/country_id'),
+            'zip' => Mage::getStoreConfig('shipping/origin/postcode'),
         );
     }
 }
