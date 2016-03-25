@@ -67,9 +67,9 @@ class Shiphawk_Order_Model_Command_SendOrder
             case 'Canceled':
                 return 'cancelled';
             case 'Complete':
-                return 'delivered';
-            case 'Pending':
-                return 'new';
+                return 'shipped';
+            case 'Processing':
+                return 'partially_shipped';
             default:
                 return 'new';
         }
