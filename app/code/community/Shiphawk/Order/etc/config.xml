@@ -34,13 +34,22 @@
         <events>
             <sales_order_place_after>
                 <observers>
-                    <shiphawk_order_order_place>
+                    <shiphawk_order_place>
                         <type>singleton</type>
                         <class>shiphawk_order/observer_order</class>
                         <method>push</method>
-                    </shiphawk_order_order_place>
+                    </shiphawk_order_place>
                 </observers>
             </sales_order_place_after>
+            <sales_order_place_before>
+                <observers>
+                    <shiphawk_order_place>
+                        <type>singleton</type>
+                        <class>shiphawk_order/observer_order</class>
+                        <method>before</method>
+                    </shiphawk_order_place>
+                </observers>
+            </sales_order_place_before>
             <admin_system_config_changed_section_shiphawk>
                 <observers>
                     <shiphawk_order_sytem_config_changed>

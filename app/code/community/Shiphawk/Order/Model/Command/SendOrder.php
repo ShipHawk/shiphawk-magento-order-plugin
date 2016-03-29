@@ -6,7 +6,10 @@ class Shiphawk_Order_Model_Command_SendOrder
     {
         $url = Mage::getStoreConfig('shiphawk/order/gateway_url');
         $key = Mage::getStoreConfig('shiphawk/order/api_key');
-        $client = new Zend_Http_Client($url . 'orders?api_key=' . $key);
+        $orderId = Mage::registry('order_id');
+
+        $endpoint = $orderId ? 'orders/' . $orderId . '/updated' : 'orders';
+        $client = new Zend_Http_Client($url . $endpoint . '?api_key=' . $key);
 
         $itemsRequest = [];
         foreach ($order->getAllItems() as $item) {
