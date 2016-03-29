@@ -6,10 +6,7 @@ class Shiphawk_Order_Model_Command_SendOrder
     {
         $url = Mage::getStoreConfig('shiphawk/order/gateway_url');
         $key = Mage::getStoreConfig('shiphawk/order/api_key');
-        $orderId = Mage::registry('order_id');
-
-        $endpoint = $orderId ? 'orders/' . $orderId . '/updated' : 'orders';
-        $client = new Zend_Http_Client($url . $endpoint . '?api_key=' . $key);
+        $client = new Zend_Http_Client($url . 'orders?api_key=' . $key);
 
         $itemsRequest = [];
         foreach ($order->getAllItems() as $item) {
@@ -44,7 +41,7 @@ class Shiphawk_Order_Model_Command_SendOrder
                 'shipping_price' => $order->getShippingAmount(),
                 'tax_price' => $order->getTaxAmount(),
                 'items_price' => $order->getSubtotal(),
-                'status' => $this->statusMap($order->getStatus()),
+                'status' => Mage::getSingleton('shiphawk_order/statusMapper')->map($order->getStatus()),
             )
         );
 
@@ -55,20 +52,6 @@ class Shiphawk_Order_Model_Command_SendOrder
             Mage::log('ShipHawk Response: ' . var_export($response, true), Zend_Log::INFO, 'shiphawk_order.log', true);
         } catch (Exception $e) {
             Mage::logException($e);
-        }
-    }
-
-    protected function statusMap($status)
-    {
-        switch ($status) {
-            case 'Canceled':
-                return 'cancelled';
-            case 'Complete':
-                return 'shipped';
-            case 'Processing':
-                return 'partially_shipped';
-            default:
-                return 'new';
         }
     }
 

@@ -2,17 +2,21 @@
 
 class Shiphawk_Order_Model_Observer_Order
 {
-    public function push($observer)
-    {
-        if (Mage::getStoreConfig('shiphawk/order/active') != 1) {
-            return;
-        }
-
-        Mage::getSingleton('shiphawk_order/command_sendOrder')->execute($observer->getOrder());
+    protected function isAvailable() {
+        return Mage::getStoreConfig('shiphawk/order/active') == 1;
     }
 
-    public function before($observer)
+    public function push($observer)
     {
-        Mage::register('order_id', $observer->getOrder()->getId());
+        if ($this->isAvailable()) {
+            Mage::getSingleton('shiphawk_order/command_sendOrder')->execute($observer->getOrder());
+        }
+    }
+
+    public function cancel($observer)
+    {
+        if ($this->isAvailable()) {
+            Mage::getSingleton('shiphawk_order/command_cancelOrder')->execute($observer->getOrder());
+        }
     }
 }

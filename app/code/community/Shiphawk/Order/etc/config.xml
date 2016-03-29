@@ -41,15 +41,15 @@
                     </shiphawk_order_place>
                 </observers>
             </sales_order_place_after>
-            <sales_order_place_before>
+            <order_cancel_after>
                 <observers>
                     <shiphawk_order_place>
                         <type>singleton</type>
                         <class>shiphawk_order/observer_order</class>
-                        <method>before</method>
+                        <method>cancel</method>
                     </shiphawk_order_place>
                 </observers>
-            </sales_order_place_before>
+            </order_cancel_after>
             <admin_system_config_changed_section_shiphawk>
                 <observers>
                     <shiphawk_order_sytem_config_changed>
