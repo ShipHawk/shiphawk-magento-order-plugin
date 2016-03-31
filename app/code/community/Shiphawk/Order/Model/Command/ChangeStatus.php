@@ -1,6 +1,6 @@
 <?php
 
-class Shiphawk_Order_Model_Command_CancelOrder
+class Shiphawk_Order_Model_Command_ChangeStatus
 {
     public function execute(Mage_Sales_Model_Order $order)
     {

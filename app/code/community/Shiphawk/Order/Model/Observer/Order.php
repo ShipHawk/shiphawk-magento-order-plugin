@@ -13,10 +13,10 @@ class Shiphawk_Order_Model_Observer_Order
         }
     }
 
-    public function cancel($observer)
+    public function changeStatus($observer)
     {
         if ($this->isAvailable()) {
-            Mage::getSingleton('shiphawk_order/command_cancelOrder')->execute($observer->getOrder());
+            Mage::getModel('shiphawk_order/command_changeStatus')->execute($observer->getOrder());
         }
     }
 }
