@@ -32,7 +32,7 @@
                     this carrier appears relative to the other
                     carriers available in checkout.
                 -->
-                <sort_order>10</sort_order>
+                <sort_order>1</sort_order>
                 <!--
                     Out of the box, Magento offers shipping
                     carriers the ability to restrict themselves

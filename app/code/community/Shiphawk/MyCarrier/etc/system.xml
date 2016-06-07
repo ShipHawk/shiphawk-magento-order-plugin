@@ -4,7 +4,7 @@
         <carriers translate="label" module="shipping">
             <groups>
                 <shiphawk_mycarrier translate="label">
-                    <label>ShipHawk Carrier</label>
+                    <label>ShipHawk</label>
                     <frontend_type>text</frontend_type>
                     <sort_order>2</sort_order>
                     <show_in_default>1</show_in_default>
@@ -64,7 +64,7 @@
                             installation.
                         -->
                         <sallowspecific translate="label">
-                            <label>Ship to Applicable Countries</label>
+                            <label>Applicable Destination Countries</label>
                             <frontend_type>select</frontend_type>
                             <sort_order>90</sort_order>
                             <frontend_class>shipping-applicable-country</frontend_class>
@@ -81,7 +81,7 @@
                             should be available for.
                         -->
                         <specificcountry translate="label">
-                            <label>Ship to Specific Countries</label>
+                            <label>Specific Destination Countries</label>
                             <frontend_type>multiselect</frontend_type>
                             <sort_order>91</sort_order>
                             <source_model>adminhtml/system_config_source_country</source_model>
