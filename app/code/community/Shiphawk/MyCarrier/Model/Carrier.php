@@ -18,7 +18,8 @@ class ShipHawk_MyCarrier_Model_Carrier
             ),
             'destination_address'=> array(
                 'zip'=>$to_zip = $request->getDestPostcode()
-            )
+            ),
+            'apply_rules'=>'true'
         );
 
         Mage::log($rateRequest);

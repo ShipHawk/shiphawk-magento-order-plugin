@@ -1,12 +1,12 @@
 <?xml version="1.0"?>
 <config>
     <modules>
-        <ShipHawk_MyCarrier>
+        <Shiphawk_MyCarrier>
             <active>true</active>
             <codePool>community</codePool>
             <depends>
                 <Mage_Shipping />
             </depends>
-        </ShipHawk_MyCarrier>
+        </Shiphawk_MyCarrier>
     </modules>
 </config>

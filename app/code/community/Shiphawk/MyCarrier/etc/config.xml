@@ -1,14 +1,14 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <config>
     <modules>
-        <ShipHawk_MyCarrier>
+        <Shiphawk_MyCarrier>
             <module>0.0.1</module>
-        </ShipHawk_MyCarrier>
+        </Shiphawk_MyCarrier>
     </modules>
     <global>
         <models>
             <shiphawk_mycarrier>
-                <class>ShipHawk_MyCarrier_Model</class>
+                <class>Shiphawk_MyCarrier_Model</class>
             </shiphawk_mycarrier>
         </models>
     </global>
