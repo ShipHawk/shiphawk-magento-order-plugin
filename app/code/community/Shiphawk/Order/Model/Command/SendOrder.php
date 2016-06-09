@@ -4,11 +4,22 @@ class Shiphawk_Order_Model_Command_SendOrder
 {
     public function execute(Mage_Sales_Model_Order $order)
     {
+        Mage::log('building order object for Shiphawk');
         $url = Mage::getStoreConfig('shiphawk/order/gateway_url');
         $key = Mage::getStoreConfig('shiphawk/order/api_key');
         $client = new Zend_Http_Client($url . 'orders?api_key=' . $key);
 
         $itemsRequest = [];
+
+        $shippingRateId = $order->getShippingMethod();
+        Mage::log('shipping method');
+        Mage::log($shippingRateId);
+        if(count($temp = explode('shiphawk_mycarrier_', $shippingRateId)) > 1)
+        {
+            $shippingRateId = $temp[1];
+        }
+        
+
         foreach ($order->getAllItems() as $item) {
             /** @var Mage_Sales_Model_Order_Item $item */
             $itemsRequest[] = array(
@@ -34,6 +45,8 @@ class Shiphawk_Order_Model_Command_SendOrder
                 'source_system' => 'magento',
                 'source_system_id' => $order->getEntityId(),
                 'source_system_processed_at' => '',
+                'rate_uuid' => $shippingRateId,
+                'requested_shipping_details'=> $order->getShippingDescription(),
                 'origin_address' => $this->getOriginAddress(),
                 'destination_address' => $this->prepareAddress($order->getShippingAddress()),
                 'order_line_items' => $itemsRequest,
