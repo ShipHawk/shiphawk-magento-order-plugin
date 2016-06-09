@@ -2,7 +2,7 @@
 <config>
     <tabs>
         <shiphawk translate="label" module="shiphawk_order">
-            <label>Shiphawk</label>
+            <label><![CDATA[<div style="position: absolute; display: flex; align-items: center;"><img id="shiphawk_block" style="width:18px; margin-right: 5px;" src="" alt="" border="0" />ShipHawk</div>&nbsp;<script>$('shiphawk_block').src = SKIN_URL + "images/shiphawk/shiphawkicon.png";</script>]]></label>
             <sort_order>999999</sort_order>
         </shiphawk>
     </tabs>
