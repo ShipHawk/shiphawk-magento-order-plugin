@@ -11,14 +11,13 @@ class Shiphawk_Order_Model_Command_SendOrder
 
         $itemsRequest = [];
 
-        $shippingRateId = $order->getShippingMethod();
+        $shippingRateId = '';
         Mage::log('shipping method');
         Mage::log($shippingRateId);
-        if(count($temp = explode('shiphawk_mycarrier_', $shippingRateId)) > 1)
+        if(count($temp = explode('shiphawk_mycarrier_', $order->getShippingMethod())) > 1)
         {
             $shippingRateId = $temp[1];
         }
-        
 
         foreach ($order->getAllItems() as $item) {
             /** @var Mage_Sales_Model_Order_Item $item */
