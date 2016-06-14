@@ -10,14 +10,18 @@ class Shiphawk_Order_Model_Command_SendOrder
         $client = new Zend_Http_Client($url . 'orders?api_key=' . $key);
 
         $itemsRequest = [];
-
         $shippingRateId = '';
-        Mage::log('shipping method');
-        Mage::log($shippingRateId);
-        if(count($temp = explode('shiphawk_mycarrier_', $order->getShippingMethod())) > 1)
-        {
-            $shippingRateId = $temp[1];
+
+        Mage::log('rates array:...');
+        Mage::log(Mage::getSingleton('core/session')->getSHRateAarray());
+
+        $SHRates = Mage::getSingleton('core/session')->getSHRateAarray();
+        foreach($SHRates as $rateRow){
+            if(($rateRow->carrier . ' - ' . $rateRow->service_level)  == $order->getShippingDescription()){
+                $shippingRateId = $rateRow->id;
+            }
         }
+
 
         foreach ($order->getAllItems() as $item) {
             /** @var Mage_Sales_Model_Order_Item $item */

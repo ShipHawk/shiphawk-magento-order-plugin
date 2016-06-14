@@ -2,7 +2,7 @@
 <config>
     <modules>
         <Shiphawk_MyCarrier>
-            <module>0.0.1</module>
+            <module>2.0.0</module>
         </Shiphawk_MyCarrier>
     </modules>
     <global>

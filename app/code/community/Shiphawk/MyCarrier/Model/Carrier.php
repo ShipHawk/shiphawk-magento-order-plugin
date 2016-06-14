@@ -28,13 +28,13 @@ class ShipHawk_MyCarrier_Model_Carrier
 
         Mage::log($rateResponse);
 
-        if($rateResponse->isSuccessful())
+        if($rateResponse && $rateResponse->isSuccessful())
         {
             $rateArray = json_decode($rateResponse->getBody());
             Mage::log($rateArray);
         }
 
-
+        Mage::getSingleton('core/session')->setSHRateAarray($rateArray->rates);
         foreach($rateArray->rates as $rateRow)
         {
             $result->append($this->_buildRate($rateRow));
@@ -58,9 +58,8 @@ class ShipHawk_MyCarrier_Model_Carrier
          */
         $rate->setCarrierTitle($shRate->carrier);
 
-        $rate->setMethod($shRate->id);
+        $rate->setMethod($shRate->carrier. '-' . $shRate->service_level);
         $rate->setMethodTitle($shRate->service_level);
-        //$rate->setCode($shRate->id);
 
         $rate->setPrice($shRate->price);
         $rate->setCost($shRate->price);
@@ -107,9 +106,6 @@ class ShipHawk_MyCarrier_Model_Carrier
 
     public function getAllowedMethods()
     {
-        return array(
-            'standard' => 'Standard',
-            'shiphawk' => 'Shiphawk',
-        );
+        return array();
     }
 }

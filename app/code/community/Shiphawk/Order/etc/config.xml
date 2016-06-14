@@ -2,7 +2,7 @@
 <config>
     <modules>
         <Shiphawk_Order>
-            <version>1.0.0</version>
+            <version>2.0.0</version>
         </Shiphawk_Order>
     </modules>
     <global>
