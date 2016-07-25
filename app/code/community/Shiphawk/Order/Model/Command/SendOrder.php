@@ -4,11 +4,25 @@ class Shiphawk_Order_Model_Command_SendOrder
 {
     public function execute(Mage_Sales_Model_Order $order)
     {
+        Mage::log('building order object for Shiphawk');
         $url = Mage::getStoreConfig('shiphawk/order/gateway_url');
         $key = Mage::getStoreConfig('shiphawk/order/api_key');
         $client = new Zend_Http_Client($url . 'orders?api_key=' . $key);
 
         $itemsRequest = [];
+        $shippingRateId = '';
+
+        Mage::log('rates array:...');
+        Mage::log(Mage::getSingleton('core/session')->getSHRateAarray());
+
+        $SHRates = Mage::getSingleton('core/session')->getSHRateAarray();
+        foreach($SHRates as $rateRow){
+            if(($rateRow->carrier . ' - ' . $rateRow->service_level)  == $order->getShippingDescription()){
+                $shippingRateId = $rateRow->id;
+            }
+        }
+
+
         foreach ($order->getAllItems() as $item) {
             /** @var Mage_Sales_Model_Order_Item $item */
             $itemsRequest[] = array(
@@ -16,7 +30,7 @@ class Shiphawk_Order_Model_Command_SendOrder
                 'name' => $item->getName(),
                 'sku' => $item->getSku(),
                 'quantity' => $item->getQtyOrdered(),
-                'price' => $item->getPrice(),
+                'value' => $item->getPrice(),
                 'length' => $item->getLength(),
                 'width' => $item->getWidth(),
                 'height' => $item->getHeight(),
@@ -34,6 +48,8 @@ class Shiphawk_Order_Model_Command_SendOrder
                 'source_system' => 'magento',
                 'source_system_id' => $order->getEntityId(),
                 'source_system_processed_at' => '',
+                'requested_rate_id' => $shippingRateId,
+                'requested_shipping_details'=> $order->getShippingDescription(),
                 'origin_address' => $this->getOriginAddress(),
                 'destination_address' => $this->prepareAddress($order->getShippingAddress()),
                 'order_line_items' => $itemsRequest,
