@@ -8,7 +8,7 @@ class Shiphawk_Order_Model_Command_ChangeStatus
         $key = Mage::getStoreConfig('shiphawk/order/api_key');
 
         $client = new Zend_Http_Client($url . 'orders/' . $order->getIncrementId() . '/cancelled');
-        $client.setHeaders('X-Api-Key', $key);
+        $client->setHeaders('X-Api-Key', $key);
 
         $orderRequest = json_encode(
             array(
