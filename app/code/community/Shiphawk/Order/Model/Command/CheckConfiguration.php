@@ -6,7 +6,9 @@ class Shiphawk_Order_Model_Command_CheckConfiguration
     {
         $url = Mage::getStoreConfig('shiphawk/order/gateway_url');
         $key = Mage::getStoreConfig('shiphawk/order/api_key');
-        $client = new Zend_Http_Client($url . 'user?api_key=' . $key);
+        $client = new Zend_Http_Client($url . 'user');
+        $client.setHeaders('X-Api-Key', $key);
+
 
         $response = $client->request(Zend_Http_Client::GET);
 

@@ -7,7 +7,8 @@ class Shiphawk_Order_Model_Command_SendOrder
         Mage::log('building order object for Shiphawk');
         $url = Mage::getStoreConfig('shiphawk/order/gateway_url');
         $key = Mage::getStoreConfig('shiphawk/order/api_key');
-        $client = new Zend_Http_Client($url . 'orders?api_key=' . $key);
+        $client = new Zend_Http_Client($url . 'orders');
+        $client.setHeaders('X-Api-Key', $key);
 
         $itemsRequest = [];
         $shippingRateId = '';

@@ -74,7 +74,8 @@ class ShipHawk_MyCarrier_Model_Carrier
 
         $jsonRateRequest = json_encode($rateRequest);
 
-        $client = new Zend_Http_Client($url . 'rates?api_key=' . $key);
+        $client = new Zend_Http_Client($url . 'rates');
+        $client.setHeaders('X-Api-Key', $key);
 
         Mage::log($jsonRateRequest, Zend_Log::INFO, 'shiphawk_rates.log', true);
 
