@@ -14,7 +14,7 @@ class Shiphawk_Order_Model_Command_CheckConfiguration
 
         if ($response->isSuccessful()) {
             Mage::getSingleton('adminhtml/session')
-                ->addSuccess(Mage::helper('shiphawk_order')->__('Your account successfully linked.'));
+                ->addSuccess(Mage::helper('shiphawk_order')->__('Your account is successfully linked with Shiphawk.'));
             Mage::getConfig()->saveConfig('shiphawk/order/status', 1);
         } else {
             Mage::getSingleton('adminhtml/session')

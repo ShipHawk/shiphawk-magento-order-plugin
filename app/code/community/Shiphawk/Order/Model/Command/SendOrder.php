@@ -28,7 +28,15 @@ class Shiphawk_Order_Model_Command_SendOrder
         foreach ($order->getAllItems() as $item) {
             /** @var Mage_Sales_Model_Order_Item $item */
             $itemsRequest[] = array(
-                'sku' => $item->getSku()
+
+                'name' => $item->getName(),
+                'sku' => $item->getSku(),
+                'quantity' => $item->getQtyOrdered(),
+                'price' => $item->getPrice(),
+                'length' => $item->getLength(),
+                'width' => $item->getWidth(),
+                'height' => $item->getHeight(),
+                'weight' => $item->getWeight(),
             );
         }
 
@@ -82,6 +90,8 @@ class Shiphawk_Order_Model_Command_SendOrder
     protected function getOriginAddress()
     {
         return array(
+            'name' => Mage::getStoreConfig('general/store_information/name'),
+            'phone_number' => Mage::getStoreConfig('general/store_information/phone'),
             'street1' => Mage::getStoreConfig('shipping/origin/street_line1'),
             'street2' => Mage::getStoreConfig('shipping/origin/street_line2'),
             'city' => Mage::getStoreConfig('shipping/origin/city'),
