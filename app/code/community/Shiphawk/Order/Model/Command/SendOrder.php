@@ -37,7 +37,7 @@ class Shiphawk_Order_Model_Command_SendOrder
                 'order_number' => $order->getIncrementId(),
                 'source_system' => 'magento',
                 'source_system_id' => $order->getEntityId(),
-                'source_system_processed_at' => '',
+                'source_system_processed_at' => date('Y-m-d H:i:s'),
                 'requested_rate_id' => $shippingRateId,
                 'requested_shipping_details'=> $order->getShippingDescription(),
                 'origin_address' => $this->getOriginAddress(),
@@ -75,8 +75,7 @@ class Shiphawk_Order_Model_Command_SendOrder
             'state' => $address->getRegionCode(),
             'country' => $address->getCountryId(),
             'zip'  => $address->getPostcode(),
-            'email' => $address->getEmail(),
-            'code'  => $address->getAddressType(),
+            'email' => $address->getEmail()
         );
     }
 
