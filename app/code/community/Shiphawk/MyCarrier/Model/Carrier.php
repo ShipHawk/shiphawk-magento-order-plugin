@@ -93,9 +93,11 @@ class ShipHawk_MyCarrier_Model_Carrier
     public function getItems($request)
     {
         $items = array();
+        $skuColumn = Mage::getStoreConfig('shiphawk/order/sku_column');
+        Mage::log('getting sku from column: ' . $skuColumn, Zend_Log::INFO, 'shiphawk_rates.log', true);
         foreach ($request->getAllItems() as $item) {
             $items[] = array(
-                'product_sku' => $item->getSku()
+                'product_sku' => $item->getData($skuColumn)
             );
         }
 

@@ -24,13 +24,13 @@ class Shiphawk_Order_Model_Command_SendOrder
             }
         }
 
-
+        $skuColumn = Mage::getStoreConfig('shiphawk/order/sku_column');
         foreach ($order->getAllItems() as $item) {
             /** @var Mage_Sales_Model_Order_Item $item */
             $itemsRequest[] = array(
 
                 'name' => $item->getName(),
-                'sku' => $item->getSku(),
+                'sku' => $item->getData($skuColumn),
                 'quantity' => $item->getQtyOrdered(),
                 'price' => $item->getPrice(),
                 'length' => $item->getLength(),
