@@ -66,8 +66,10 @@
             <order>
                 <active>1</active>
                 <gateway_url>https://shiphawk.com/api/v4/</gateway_url>
-                <sku_column>sku</sku_column>
             </order>
+            <datamapping>
+                <sku_column>sku</sku_column>
+            </datamapping>
         </shiphawk>
     </default>
     <adminhtml>
