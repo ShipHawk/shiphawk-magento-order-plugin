@@ -98,7 +98,12 @@ class ShipHawk_MyCarrier_Model_Carrier
         foreach ($request->getAllItems() as $item) {
             $items[] = array(
                 'product_sku' => $item->getData($skuColumn),
-                'quantity' => $item->getQty()
+                'quantity'    => $item->getQty(),
+                'value'       => $item->getPrice(),
+                'length'      => $item->getLength(),
+                'width'       => $item->getWidth(),
+                'height'      => $item->getHeight(),
+                'weight'      => $item->getWeight()
             );
         }
 
