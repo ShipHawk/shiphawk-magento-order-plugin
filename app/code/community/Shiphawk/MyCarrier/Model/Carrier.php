@@ -103,15 +103,16 @@ class ShipHawk_MyCarrier_Model_Carrier
             $items[] = array(
                 'product_sku' => $product->getData($skuColumn),
                 'quantity' => $item->getQty(),
-                'value'       => $item->getPrice(),
-                'length'      => $item->getLength(),
-                'width'       => $item->getWidth(),
-                'height'      => $item->getHeight(),
-                'weight'      => $item->getWeight()
+                'value'         => $item->getPrice(),
+                'length'        => $item->getLength(),
+                'width'         => $item->getWidth(),
+                'height'        => $item->getHeight(),
+                'weight'        => $item->getWeight(),
+                'item_type'     => $item->getWeight()  <= 70 ? 'parcel' : 'handling_unit',
+                'handling_unit' => $item->getWeight()  <= 70 ? '' : 'box'
             );
 
-            $items['item_type'] =  $items['weight']  <= 70 ? 'parcel' : 'handling_unit';
-            $items['handling_unit'] = $items['weight']  <= 70 ? '' : 'box';
+
 
         }
 
