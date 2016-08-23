@@ -27,10 +27,11 @@ class Shiphawk_Order_Model_Command_SendOrder
         $skuColumn = Mage::getStoreConfig('shiphawk/datamapping/sku_column');
         foreach ($order->getAllItems() as $item) {
             /** @var Mage_Sales_Model_Order_Item $item */
+            $product_id = $item->getProductId();
+            $product = Mage::getModel('catalog/product')->load($product_id);
             $itemsRequest[] = array(
-
                 'name' => $item->getName(),
-                'sku' => $item->getData($skuColumn),
+                'sku' => $product->getData($skuColumn),
                 'quantity' => $item->getQtyOrdered(),
                 'price' => $item->getPrice(),
                 'length' => $item->getLength(),
