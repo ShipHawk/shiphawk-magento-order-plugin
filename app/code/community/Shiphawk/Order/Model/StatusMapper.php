@@ -10,7 +10,7 @@ class Shiphawk_Order_Model_StatusMapper
             case 'complete':
                 return 'shipped';
             case 'processing':
-                return 'new';
+                return 'partially_shipped';
             default:
                 return 'new';
         }

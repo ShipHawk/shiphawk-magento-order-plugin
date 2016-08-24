@@ -16,7 +16,7 @@ class Shiphawk_Order_Model_Observer_Order
     public function changeStatus($observer)
     {
         if ($this->isAvailable()) {
-            Mage::getModel('shiphawk_order/command_changeStatus')->execute($observer->getOrder());
+           //Mage::getModel('shiphawk_order/command_changeStatus')->execute($observer->getOrder());
         }
     }
 }
