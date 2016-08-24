@@ -30,16 +30,17 @@ class Shiphawk_Order_Model_Command_SendOrder
             $product_id = $item->getProductId();
             $product = Mage::getModel('catalog/product')->load($product_id);
             $itemsRequest[] = array(
-                'name'          => $item->getName(),
-                'sku'           => $product->getData($skuColumn),
-                'quantity'      => $item->getQtyOrdered(),
-                'price'         => $item->getPrice(),
-                'length'        => $item->getLength(),
-                'width'         => $item->getWidth(),
-                'height'        => $item->getHeight(),
-                'weight'        => $item->getWeight(),
-                'item_type'     => $item->getWeight()  <= 70 ? 'parcel' : 'handling_unit',
-                'handling_unit' => $item->getWeight()  <= 70 ? '' : 'box'
+                'name'               => $item->getName(),
+                'sku'                => $product->getData($skuColumn),
+                'quantity'           => $item->getQtyOrdered(),
+                'price'              => $item->getPrice(),
+                'length'             => $item->getLength(),
+                'width'              => $item->getWidth(),
+                'height'             => $item->getHeight(),
+                'weight'             => $item->getWeight(),
+                'can_ship_parcel'    => true,
+                'item_type'          => $item->getWeight()  <= 70 ? 'parcel' : 'handling_unit',
+                'handling_unit_type' => $item->getWeight()  <= 70 ? '' : 'box'
             );
 
         }
