@@ -109,7 +109,7 @@ class ShipHawk_MyCarrier_Model_Carrier
                 'height'        => $item->getHeight(),
                 'weight'        => $item->getWeight(),
                 'item_type'     => $item->getWeight()  <= 70 ? 'parcel' : 'handling_unit',
-                'handling_unit' => $item->getWeight()  <= 70 ? '' : 'box'
+                'handling_unit_type' => $item->getWeight()  <= 70 ? '' : 'box'
             );
 
 
