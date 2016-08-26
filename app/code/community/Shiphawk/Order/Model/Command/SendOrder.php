@@ -50,7 +50,7 @@ class Shiphawk_Order_Model_Command_SendOrder
                 'order_number' => $order->getIncrementId(),
                 'source_system' => 'magento',
                 'source_system_id' => $order->getEntityId(),
-                'source_system_processed_at' => getCreatedAt(),
+                'source_system_processed_at' => $order->getCreatedAt(),
                 'requested_rate_id' => $shippingRateId,
                 'requested_shipping_details'=> $order->getShippingDescription(),
                 'origin_address' => $this->getOriginAddress(),
