@@ -77,18 +77,19 @@ class Shiphawk_Order_Model_Command_SendOrder
     protected function prepareAddress(Mage_Sales_Model_Order_Address $address)
     {
         return array(
-            'name' => $address->getFirstname() . ' '
+            'name'              => $address->getFirstname() . ' '
                 . $address->getMiddlename() . ' '
                 . $address->getLastname(),
-            'company' => $address->getCompany(),
-            'street1' => $address->getStreet1(),
-            'street2' => $address->getStreet2(),
-            'phone_number' => $address->getTelephone(),
-            'city' => $address->getCity(),
-            'state' => $address->getRegionCode(),
-            'country' => $address->getCountryId(),
-            'zip'  => $address->getPostcode(),
-            'email' => $address->getEmail()
+            'company'           => $address->getCompany(),
+            'street1'           => $address->getStreet1(),
+            'street2'           => $address->getStreet2(),
+            'phone_number'      => $address->getTelephone(),
+            'city'              => $address->getCity(),
+            'state'             => $address->getRegionCode(),
+            'country'           => $address->getCountryId(),
+            'zip'               => $address->getPostcode(),
+            'email'             => $address->getEmail(),
+            'is_residential'    =>  'true'
         );
     }
 

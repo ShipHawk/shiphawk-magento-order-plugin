@@ -17,7 +17,8 @@ class ShipHawk_MyCarrier_Model_Carrier
                 'zip'=>Mage::getStoreConfig('shipping/origin/postcode')
             ),
             'destination_address'=> array(
-                'zip'=>$to_zip = $request->getDestPostcode()
+                'zip'               =>  $to_zip = $request->getDestPostcode(),
+                'is_residential'    =>  'true'
             ),
             'apply_rules'=>'true'
         );
