@@ -33,7 +33,7 @@ class Shiphawk_Order_Model_Command_SendOrder
                 'name'               => $item->getName(),
                 'sku'                => $product->getData($skuColumn),
                 'quantity'           => $item->getQtyOrdered(),
-                'price'              => $item->getPrice(),
+                'value'              => $item->getPrice(),
                 'length'             => $item->getLength(),
                 'width'              => $item->getWidth(),
                 'height'             => $item->getHeight(),
