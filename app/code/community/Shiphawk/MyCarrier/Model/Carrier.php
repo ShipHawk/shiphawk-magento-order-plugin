@@ -59,8 +59,8 @@ class ShipHawk_MyCarrier_Model_Carrier
          */
         $rate->setCarrierTitle($shRate->carrier);
 
-        $rate->setMethod($shRate->carrier. '-' . $shRate->service_level);
-        $rate->setMethodTitle($shRate->service_level);
+        $rate->setMethod($shRate->carrier. '-' . $shRate->service_name);
+        $rate->setMethodTitle($shRate->service_name);
 
         $rate->setPrice($shRate->price);
         $rate->setCost($shRate->price);
