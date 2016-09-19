@@ -29,6 +29,7 @@ class Shiphawk_Order_Model_Command_SendOrder
             /** @var Mage_Sales_Model_Order_Item $item */
             $product_id = $item->getProductId();
             $product = Mage::getModel('catalog/product')->load($product_id);
+            $item_weight = $item->getWeight();
             $itemsRequest[] = array(
                 'name'               => $item->getName(),
                 'sku'                => $product->getData($skuColumn),
@@ -37,10 +38,10 @@ class Shiphawk_Order_Model_Command_SendOrder
                 'length'             => $item->getLength(),
                 'width'              => $item->getWidth(),
                 'height'             => $item->getHeight(),
-                'weight'             => $item->getWeight(),
+                'weight'             => $item_weight <= 70 ? $item_weight * 16 : $item_weight,
                 'can_ship_parcel'    => true,
-                'item_type'          => $item->getWeight()  <= 70 ? 'parcel' : 'handling_unit',
-                'handling_unit_type' => $item->getWeight()  <= 70 ? '' : 'box'
+                'item_type'          => $item_weight  <= 70 ? 'parcel' : 'handling_unit',
+                'handling_unit_type' => $item_weight  <= 70 ? '' : 'box'
             );
 
         }
@@ -48,6 +49,7 @@ class Shiphawk_Order_Model_Command_SendOrder
         $orderRequest = json_encode(
             array(
                 'order_number' => $order->getIncrementId(),
+                'source' => 'magento',
                 'source_system' => 'magento',
                 'source_system_id' => $order->getEntityId(),
                 'source_system_processed_at' => $order->getCreatedAt(),

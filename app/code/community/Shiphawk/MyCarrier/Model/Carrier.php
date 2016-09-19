@@ -101,6 +101,7 @@ class ShipHawk_MyCarrier_Model_Carrier
             $product = Mage::getModel('catalog/product')->load($product_id);
             //commenting out log statment to make the logs more readable. Uncomment when debugging rating.
             //Mage::log('product data: ' . var_export($product->debug(), true), Zend_Log::INFO, 'shiphawk_rates.log', true);
+            $item_weight = $item->getWeight();
             $items[] = array(
                 'product_sku' => $product->getData($skuColumn),
                 'quantity' => $item->getQty(),
@@ -108,9 +109,9 @@ class ShipHawk_MyCarrier_Model_Carrier
                 'length'        => $item->getLength(),
                 'width'         => $item->getWidth(),
                 'height'        => $item->getHeight(),
-                'weight'        => $item->getWeight(),
-                'item_type'     => $item->getWeight()  <= 70 ? 'parcel' : 'handling_unit',
-                'handling_unit_type' => $item->getWeight()  <= 70 ? '' : 'box'
+                'weight'        => $item_weight <= 70 ? $item_weight * 16 : $item_weight,
+                'item_type'     => $item_weight  <= 70 ? 'parcel' : 'handling_unit',
+                'handling_unit_type' =>$item_weight  <= 70 ? '' : 'box'
             );
 
 
