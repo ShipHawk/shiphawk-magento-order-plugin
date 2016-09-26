@@ -96,7 +96,7 @@ class ShipHawk_MyCarrier_Model_Carrier
         $items = array();
         $skuColumn = Mage::getStoreConfig('shiphawk/datamapping/sku_column');
         Mage::log('getting sku from column: ' . $skuColumn, Zend_Log::INFO, 'shiphawk_rates.log', true);
-        foreach ($request->getAllItems() as $item) {
+        foreach ($request->getAllItems()->getOptionByCode('simple_product') as $item) {
             $product_id = $item->getProductId();
             $product = Mage::getModel('catalog/product')->load($product_id);
             //commenting out log statment to make the logs more readable. Uncomment when debugging rating.
