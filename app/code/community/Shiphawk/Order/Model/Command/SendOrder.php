@@ -26,15 +26,17 @@ class Shiphawk_Order_Model_Command_SendOrder
 
         $skuColumn = Mage::getStoreConfig('shiphawk/datamapping/sku_column');
         $SimpleItems = array();
-        foreach($order->getQuote()->getAllItems() as $item){
+        foreach($order->getAllVisibleItems() as $item){
             if($item->getHasChildren()) {
                 foreach($item->getChildrenItems() as $child) {
                     $SimpleItems[] = $child;
                 }
-            } else {
+            }
+            else if(!$item->getHasParent())  {
                 $SimpleItems[] = $item;
             }
         }
+
         foreach ($SimpleItems as $item) {
             $product_id = $item->getProductId();
             $product = Mage::getModel('catalog/product')->load($product_id);

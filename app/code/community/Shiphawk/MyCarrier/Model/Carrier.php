@@ -96,23 +96,45 @@ class ShipHawk_MyCarrier_Model_Carrier
         $items = array();
         $skuColumn = Mage::getStoreConfig('shiphawk/datamapping/sku_column');
         Mage::log('getting sku from column: ' . $skuColumn, Zend_Log::INFO, 'shiphawk_rates.log', true);
-        foreach ($request->getAllItems()->getOptionByCode('simple_product') as $item) {
-            $product_id = $item->getProductId();
-            $product = Mage::getModel('catalog/product')->load($product_id);
-            //commenting out log statment to make the logs more readable. Uncomment when debugging rating.
-            //Mage::log('product data: ' . var_export($product->debug(), true), Zend_Log::INFO, 'shiphawk_rates.log', true);
-            $item_weight = $item->getWeight();
-            $items[] = array(
-                'product_sku' => $product->getData($skuColumn),
-                'quantity' => $item->getQty(),
-                'value'         => $item->getPrice(),
-                'length'        => $item->getLength(),
-                'width'         => $item->getWidth(),
-                'height'        => $item->getHeight(),
-                'weight'        => $item_weight <= 70 ? $item_weight * 16 : $item_weight,
-                'item_type'     => $item_weight  <= 70 ? 'parcel' : 'handling_unit',
-                'handling_unit_type' =>$item_weight  <= 70 ? '' : 'box'
-            );
+        foreach ($request->getAllItems() as $item) {
+
+            if($option = $item->getOptionByCode('simple_product')) {
+
+                $product_id = $option->getProductId();
+                $product = Mage::getModel('catalog/product')->load($product_id);
+                //commenting out log statment to make the logs more readable. Uncomment when debugging rating.
+                //Mage::log('product data: ' . var_export($product->debug(), true), Zend_Log::INFO, 'shiphawk_rates.log', true);
+                $item_weight = $item->getWeight();
+                $items[] = array(
+                    'product_sku' => $product->getData($skuColumn),
+                    'quantity' => $item->getQty(),
+                    'value' => $option->getPrice(),
+                    'length' => $option->getLength(),
+                    'width' => $option->getWidth(),
+                    'height' => $option->getHeight(),
+                    'weight' => $item_weight <= 70 ? $item_weight * 16 : $item_weight,
+                    'item_type' => $item_weight <= 70 ? 'parcel' : 'handling_unit',
+                    'handling_unit_type' => $item_weight <= 70 ? '' : 'box'
+                );
+            }
+            else if( $item->getTypeId() != 'configurable' && !$item->getParentItemId() ){
+                $product_id = $item->getProductId();
+                $product = Mage::getModel('catalog/product')->load($product_id);
+                //commenting out log statment to make the logs more readable. Uncomment when debugging rating.
+                //Mage::log('product data: ' . var_export($product->debug(), true), Zend_Log::INFO, 'shiphawk_rates.log', true);
+                $item_weight = $item->getWeight();
+                $items[] = array(
+                    'product_sku' => $product->getData($skuColumn),
+                    'quantity' => $item->getQty(),
+                    'value' => $item->getPrice(),
+                    'length' => $item->getLength(),
+                    'width' => $item->getWidth(),
+                    'height' => $item->getHeight(),
+                    'weight' => $item_weight <= 70 ? $item_weight * 16 : $item_weight,
+                    'item_type' => $item_weight <= 70 ? 'parcel' : 'handling_unit',
+                    'handling_unit_type' => $item_weight <= 70 ? '' : 'box'
+                );
+            }
 
 
 
