@@ -52,7 +52,8 @@ class Shiphawk_Order_Model_Command_SendOrder
                 'weight' => $item_weight <= 70 ? $item_weight * 16 : $item_weight,
                 'can_ship_parcel' => true,
                 'item_type' => $item_weight <= 70 ? 'parcel' : 'handling_unit',
-                'handling_unit_type' => $item_weight <= 70 ? '' : 'box'
+                'handling_unit_type' => $item_weight <= 70 ? '' : 'box',
+                'source_system_id' => $item->getItemId()
             );
         }
 
