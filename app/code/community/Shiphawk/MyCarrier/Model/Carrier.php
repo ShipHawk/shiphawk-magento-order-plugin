@@ -36,16 +36,25 @@ class ShipHawk_MyCarrier_Model_Carrier
         }
 
         Mage::getSingleton('core/session')->setSHRateAarray($rateArray->rates);
-        foreach($rateArray->rates as $rateRow)
-        {
-            $result->append($this->_buildRate($rateRow));
+
+        $freeServices = array();
+
+        if ($request->getFreeShipping() === true) {
+            $freeServicesString = $this->getConfigData('free_method');
+            if ($freeServicesString) {
+                $freeServices = explode(",", $freeServicesString);
+            }
         }
 
+        foreach($rateArray->rates as $rateRow)
+        {
+            $result->append($this->_buildRate($rateRow, $freeServices));
+        }
 
         return $result;
     }
 
-    protected function _buildRate($shRate)
+    protected function _buildRate($shRate, $freeServices)
     {
         Mage::log('processing rate');
         Mage::log($shRate);
@@ -58,12 +67,17 @@ class ShipHawk_MyCarrier_Model_Carrier
          * carriers/[carrier_code]/[config_key]
          */
         $rate->setCarrierTitle($shRate->carrier);
-
-        $rate->setMethod($shRate->carrier. '-' . $shRate->service_name);
+        $rate->setMethod($shRate->service_name);
+        // $rate->setMethod($shRate->carrier. '-' . $shRate->service_name);
         $rate->setMethodTitle($shRate->service_name);
 
-        $rate->setPrice($shRate->price);
         $rate->setCost($shRate->price);
+
+        if (in_array($shRate->service_name, $freeServices)){
+            $rate->setPrice(0);
+        } else {
+            $rate->setPrice($shRate->price);
+        }
 
         return $rate;
     }
@@ -148,6 +162,62 @@ class ShipHawk_MyCarrier_Model_Carrier
 
     public function getAllowedMethods()
     {
-        return array();
+        return array(
+            'FedEx 2 Day'                                                   => 'FedEx 2 Day',
+            'FedEx 2 Day Am'                                                => 'FedEx 2 Day Am',
+            'FedEx Express Saver'                                           => 'FedEx Express Saver',
+            'FedEx First Overnight'                                         => 'FedEx First Overnight',
+            'FedEx First Overnight Saturday Delivery'                       => 'FedEx First Overnight Saturday Delivery',
+            'FedEx Ground'                                                  => 'FedEx Ground',
+            'FedEx Ground Home Delivery'                                    => 'FedEx Ground Home Delivery',
+            'FedEx International Economy'                                   => 'FedEx International Economy',
+            'FedEx International First'                                     => 'FedEx International First',
+            'FedEx International Ground'                                    => 'FedEx International Ground',
+            'FedEx International Priority'                                  => 'FedEx International Priority',
+            'FedEx Priority Overnight'                                      => 'FedEx Priority Overnight',
+            'FedEx Priority Overnight Saturday Delivery'                    => 'FedEx Priority Overnight Saturday Delivery',
+            'FedEx Standard Overnight'                                      => 'FedEx Standard Overnight',
+            'First Class Mail International'                                => 'First Class Mail International',
+            'First Class Package International Service'                     => 'First Class Package International Service',
+            'First-Class Mail'                                              => 'First-Class Mail',
+            'Global Express Guaranteed'                                     => 'Global Express Guaranteed',
+            'Library Mail'                                                  => 'Library Mail',
+            'Media Mail'                                                    => 'Media Mail',
+            'Parcel Select Ground'                                          => 'Parcel Select Ground',
+            'Priority Mail'                                                 => 'Priority Mail',
+            'Priority Mail Express'                                         => 'Priority Mail Express',
+            'Priority Mail Express Flat Rate Envelope'                      => 'Priority Mail Express Flat Rate Envelope',
+            'Priority Mail Express Flat Rate Legal Envelope'                => 'Priority Mail Express Flat Rate Legal Envelope',
+            'Priority Mail Express International'                           => 'Priority Mail Express International',
+            'Priority Mail Express International Flat Rate Envelope'        => 'Priority Mail Express International Flat Rate Envelope',
+            'Priority Mail Express International Flat Rate Legal Envelope'  => 'Priority Mail Express International Flat Rate Legal Envelope',
+            'Priority Mail Express International Flat Rate Padded Envelope' => 'Priority Mail Express International Flat Rate Padded Envelope',
+            'Priority Mail Flat Rate Envelope'                              => 'Priority Mail Flat Rate Envelope',
+            'Priority Mail Flat Rate Legal Envelope'                        => 'Priority Mail Flat Rate Legal Envelope',
+            'Priority Mail International'                                   => 'Priority Mail International',
+            'Priority Mail International Flat Rate Envelope'                => 'Priority Mail International Flat Rate Envelope',
+            'Priority Mail International Flat Rate Legal Envelope'          => 'Priority Mail International Flat Rate Legal Envelope',
+            'Priority Mail International Flat Rate Padded Envelope'         => 'Priority Mail International Flat Rate Padded Envelope',
+            'Priority Mail International Large Flat Rate Box'               => 'Priority Mail International Large Flat Rate Box',
+            'Priority Mail International Medium Flat Rate Box'              => 'Priority Mail International Medium Flat Rate Box',
+            'Priority Mail International Small Flat Rate Box'               => 'Priority Mail International Small Flat Rate Box',
+            'Priority Mail Large Flat Rate Box'                             => 'Priority Mail Large Flat Rate Box',
+            'Priority Mail Medium Flat Rate Box'                            => 'Priority Mail Medium Flat Rate Box',
+            'Priority Mail Small Flat Rate Box'                             => 'Priority Mail Small Flat Rate Box',
+            'UPS Ground'                                                    => 'UPS Ground',
+            'UPS Next Day Air'                                              => 'UPS Next Day Air',
+            'UPS Next Day Air Early'                                        => 'UPS Next Day Air Early',
+            'UPS Next Day Air Saver'                                        => 'UPS Next Day Air Saver',
+            'UPS Second Day Air'                                            => 'UPS Second Day Air',
+            'UPS Second Day Air A.M.'                                       => 'UPS Second Day Air A.M.',
+            'UPS Standard'                                                  => 'UPS Standard',
+            'UPS SurePost'                                                  => 'UPS SurePost',
+            'UPS Three-Day Select'                                          => 'UPS Three-Day Select',
+            'UPS Worldwide Expedited'                                       => 'UPS Worldwide Expedited',
+            'UPS Worldwide Express'                                         => 'UPS Worldwide Express',
+            'UPS Worldwide Express Freight'                                 => 'UPS Worldwide Express Freight',
+            'UPS Worldwide Express Plus'                                    => 'UPS Worldwide Express Plus',
+            'UPS Worldwide Saver'                                           => 'UPS Worldwide Saver'
+        );
     }
 }
