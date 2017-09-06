@@ -41,6 +41,15 @@
                     </shiphawk_order_save>
                 </observers>
             </sales_order_save_after>
+            <sales_order_save_after>
+                <observers>
+                    <shiphawk_order_save>
+                        <type>singleton</type>
+                        <class>shiphawk_order/observer_order</class>
+                        <method>update</method>
+                    </shiphawk_order_save>
+                </observers>
+            </sales_order_save_after>
             <sales_order_place_after>
                 <observers>
                     <shiphawk_order_place>
