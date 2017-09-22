@@ -150,45 +150,6 @@ class ShipHawk_MyCarrier_Model_Carrier
         }
     }
 
-    public function getItems($request)
-    {
-        $items = array();
-        $skuColumn = Mage::getStoreConfig('shiphawk/datamapping/sku_column');
-        Mage::log('getting sku from column: ' . $skuColumn, Zend_Log::INFO, 'shiphawk_rates.log', true);
-        foreach ($request->getAllItems() as $item) {
-            if ($item->getProduct()->isVirtual() || $item->getParentItem()) {
-              continue;
-            }
-
-            if($option = $item->getOptionByCode('simple_product')) {
-                $itemObject = $option;
-            } else if( $item->getTypeId() != 'configurable' && !$item->getParentItemId() ){
-                $itemObject = $item;
-            }
-
-            $product_id = $itemObject->getProductId();
-            $product = Mage::getModel('catalog/product')->load($product_id);
-
-            $item_weight = $item->getWeight();
-            $items[] = array(
-                'product_sku'        => $product->getData($skuColumn),
-                'quantity'           => $item->getQty(),
-                'value'              => $itemObject->getPrice(),
-                'length'             => $itemObject->getLength(),
-                'width'              => $itemObject->getWidth(),
-                'height'             => $itemObject->getHeight(),
-                'weight'             => $item_weight <= 70 ? $item_weight * 16 : $item_weight,
-                'item_type'          => $item_weight <= 70 ? 'parcel' : 'handling_unit',
-                'handling_unit_type' => $item_weight <= 70 ? '' : 'box'
-            );
-        }
-
-        Mage::log($items);
-
-        return $items;
-    }
-
-
     public function getGroupedItems($request)
     {
         $itemsGrouped = array();
