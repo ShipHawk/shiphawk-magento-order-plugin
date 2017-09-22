@@ -10,30 +10,60 @@ class ShipHawk_MyCarrier_Model_Carrier
         $result = Mage::getModel('shipping/rate_result');
         /* @var $result Mage_Shipping_Model_Rate_Result */
 
-        $items = $this->getItems($request);
-        $rateRequest = array(
-            'items' => $items,
-            'origin_address'=> array(
-                'zip'=>Mage::getStoreConfig('shipping/origin/postcode')
-            ),
-            'destination_address'=> array(
-                'zip'               =>  $to_zip = $request->getDestPostcode(),
-                'is_residential'    =>  'true'
-            ),
-            'apply_rules'=>'true'
-        );
+        $groupedItems = $this->getGroupedItems($request);
+        // Mage::log('Items: ' . var_export($groupedItems, true), Zend_Log::INFO, 'shiphawk_rates.log', true);
 
-        Mage::log($rateRequest);
+        $rateResponsesArray = array();
 
-        $rateResponse = $this->getRates($rateRequest);
+        foreach( $groupedItems as $key => $data) {
+            $destination_address = array(
+                'zip'            =>  $to_zip = $request->getDestPostcode(),
+                'is_residential' =>  'true'
+            );
 
-        Mage::log($rateResponse);
+            $rateRequest = array(
+                'origin_address'      => $data['origin_address'],
+                'destination_address' => $destination_address,
+                'items'               => $data['items'],
+                'apply_rules'         =>'true',
+                'carrier_type'        => $data['carrier_type']
+            );
 
-        if($rateResponse && $rateResponse->isSuccessful())
-        {
-            $rateArray = json_decode($rateResponse->getBody());
-            Mage::log($rateArray);
+            if (count($groupedItems) > 1){
+                $rateRequest['rate_filter'] = 'best';
+            }
+
+            $rateResponsesArray[] = $this->getRates($rateRequest);
         }
+
+        $rateArray = new stdClass;
+        $rateArray->rates = array();
+
+        if (count($groupedItems) > 1){
+            $partialRatesArray = array();
+            $combinedRate = $this->_buildCombinedRate();
+
+            foreach ( $rateResponsesArray as $rateResponse ) {
+                if($rateResponse && $rateResponse->isSuccessful()) {
+                    $rate = json_decode($rateResponse->getBody())->rates[0];
+                    $partialRatesArray[] = $rate;
+                    $combinedRate->price += $rate->price;
+                    $combinedRate->id[] = $rate->id;
+                    $combinedRate->est_delivery_date = $rate->est_delivery_date;
+                }
+            }
+
+            if (count($partialRatesArray) == count($groupedItems)){
+                $rateArray->rates[] = $combinedRate;
+            }
+        } else {
+            $rateResponse = $rateResponsesArray[0];
+            if($rateResponse && $rateResponse->isSuccessful()) {
+                $rateArray = json_decode($rateResponse->getBody());
+            }
+        }
+
+        // Mage::log($rateArray, Zend_Log::INFO, 'shiphawk_rates.log', true);
 
         Mage::getSingleton('core/session')->setSHRateAarray($rateArray->rates);
 
@@ -52,6 +82,21 @@ class ShipHawk_MyCarrier_Model_Carrier
         }
 
         return $result;
+    }
+
+    protected function _buildCombinedRate()
+    {
+        $combinedRate = new stdClass;
+        $combinedRate->id = [];
+        $combinedRate->carrier = 'Multiple Carriers';
+        $combinedRate->carrier_code = 'multiple_carriers';
+        $combinedRate->service_name = 'Multiple Carriers';
+        $combinedRate->service_level = 'Multiple Services';
+        $combinedRate->standardized_service_name = 'Ground';
+        $combinedRate->price = 0.0;
+        $combinedRate->currency_code = 'USD';
+
+        return $combinedRate;
     }
 
     protected function _buildRate($shRate, $freeServices)
@@ -111,54 +156,132 @@ class ShipHawk_MyCarrier_Model_Carrier
         $skuColumn = Mage::getStoreConfig('shiphawk/datamapping/sku_column');
         Mage::log('getting sku from column: ' . $skuColumn, Zend_Log::INFO, 'shiphawk_rates.log', true);
         foreach ($request->getAllItems() as $item) {
+            if ($item->getProduct()->isVirtual() || $item->getParentItem()) {
+              continue;
+            }
 
             if($option = $item->getOptionByCode('simple_product')) {
-
-                $product_id = $option->getProductId();
-                $product = Mage::getModel('catalog/product')->load($product_id);
-                //commenting out log statment to make the logs more readable. Uncomment when debugging rating.
-                //Mage::log('product data: ' . var_export($product->debug(), true), Zend_Log::INFO, 'shiphawk_rates.log', true);
-                $item_weight = $item->getWeight();
-                $items[] = array(
-                    'product_sku' => $product->getData($skuColumn),
-                    'quantity' => $item->getQty(),
-                    'value' => $option->getPrice(),
-                    'length' => $option->getLength(),
-                    'width' => $option->getWidth(),
-                    'height' => $option->getHeight(),
-                    'weight' => $item_weight <= 70 ? $item_weight * 16 : $item_weight,
-                    'item_type' => $item_weight <= 70 ? 'parcel' : 'handling_unit',
-                    'handling_unit_type' => $item_weight <= 70 ? '' : 'box'
-                );
-            }
-            else if( $item->getTypeId() != 'configurable' && !$item->getParentItemId() ){
-                $product_id = $item->getProductId();
-                $product = Mage::getModel('catalog/product')->load($product_id);
-                //commenting out log statment to make the logs more readable. Uncomment when debugging rating.
-                //Mage::log('product data: ' . var_export($product->debug(), true), Zend_Log::INFO, 'shiphawk_rates.log', true);
-                $item_weight = $item->getWeight();
-                $items[] = array(
-                    'product_sku' => $product->getData($skuColumn),
-                    'quantity' => $item->getQty(),
-                    'value' => $item->getPrice(),
-                    'length' => $item->getLength(),
-                    'width' => $item->getWidth(),
-                    'height' => $item->getHeight(),
-                    'weight' => $item_weight <= 70 ? $item_weight * 16 : $item_weight,
-                    'item_type' => $item_weight <= 70 ? 'parcel' : 'handling_unit',
-                    'handling_unit_type' => $item_weight <= 70 ? '' : 'box'
-                );
+                $itemObject = $option;
+            } else if( $item->getTypeId() != 'configurable' && !$item->getParentItemId() ){
+                $itemObject = $item;
             }
 
+            $product_id = $itemObject->getProductId();
+            $product = Mage::getModel('catalog/product')->load($product_id);
 
-
+            $item_weight = $item->getWeight();
+            $items[] = array(
+                'product_sku'        => $product->getData($skuColumn),
+                'quantity'           => $item->getQty(),
+                'value'              => $itemObject->getPrice(),
+                'length'             => $itemObject->getLength(),
+                'width'              => $itemObject->getWidth(),
+                'height'             => $itemObject->getHeight(),
+                'weight'             => $item_weight <= 70 ? $item_weight * 16 : $item_weight,
+                'item_type'          => $item_weight <= 70 ? 'parcel' : 'handling_unit',
+                'handling_unit_type' => $item_weight <= 70 ? '' : 'box'
+            );
         }
 
         Mage::log($items);
 
         return $items;
+    }
+
+
+    public function getGroupedItems($request)
+    {
+        $itemsGrouped = array();
+        $skuColumn = Mage::getStoreConfig('shiphawk/datamapping/sku_column');
+        Mage::log('getting sku from column: ' . $skuColumn, Zend_Log::INFO, 'shiphawk_rates.log', true);
+
+        foreach ($request->getAllItems() as $item) {
+            if ($item->getProduct()->isVirtual() || $item->getParentItem()) {
+              continue;
+            }
+
+            if($option = $item->getOptionByCode('simple_product')) {
+                $itemObject = $option;
+            } else if( $item->getTypeId() != 'configurable' && !$item->getParentItemId() ){
+                $itemObject = $item;
+            }
+
+            $product_id = $itemObject->getProductId();
+            $product = Mage::getModel('catalog/product')->load($product_id);
+
+            $origin_address = $this->getDefaultOriginAddress();
+
+            if ($product->getData('shiphawk_origin_zipcode')) {
+                $origin_address = array(
+                    'name'         => join('', array($product->getData('shiphawk_origin_firstname'), $product->getData('shiphawk_origin_lastname'))),
+                    'phone_number' => $product->getData('shiphawk_origin_phonenum'),
+                    'street1'      => $product->getData('shiphawk_origin_addressline1'),
+                    'street2'      => $product->getData('shiphawk_origin_addressline2'),
+                    'city'         => $product->getData('shiphawk_origin_city'),
+                    'state'        => $this->getSelectAttributeValue($product, 'shiphawk_origin_state'),
+                    'country'      => 'US',
+                    'zip'          => $product->getData('shiphawk_origin_zipcode'),
+                );
+            }
+
+            $carrier_type = $this->getSelectAttributeValue($product, 'shiphawk_carrier_type');
+            $groupKey = $origin_address['zip'] . ' ' . $carrier_type;
+
+            if (!$itemsGrouped[$groupKey]){
+                $itemsGrouped[$groupKey] = array(
+                    'origin_address' => $origin_address,
+                    'carrier_type'   => $carrier_type,
+                    'items'          => array()
+                );
+            }
+
+            $item_weight = $item->getWeight();
+
+            $itemsGrouped[$groupKey]['items'][] = array(
+                'product_sku'        => $product->getData($skuColumn),
+                'quantity'           => $item->getQty(),
+                'value'              => $product->getData('shiphawk_item_value') ? $product->getData('shiphawk_item_value') : $itemObject->getPrice(),
+                'length'             => $product->getData('shiphawk_length')     ? $product->getData('shiphawk_length')     : $itemObject->getLength(),
+                'width'              => $product->getData('shiphawk_width')      ? $product->getData('shiphawk_width')      : $itemObject->getWidth(),
+                'height'             => $product->getData('shiphawk_height')     ? $product->getData('shiphawk_height')     : $itemObject->getHeight(),
+                'freight_class'      => $this->getSelectAttributeValue($product, 'shiphawk_freight_class'),
+                'weight'             => $item_weight <= 70 ? $item_weight * 16 : $item_weight,
+                'item_type'          => $item_weight <= 70 ? 'parcel' : 'handling_unit',
+                'handling_unit_type' => $item_weight <= 70 ? '' : 'box'
+            );
+        }
+
+        return $itemsGrouped;
 
     }
+
+    protected function getSelectAttributeValue($product, $attributeCode)
+    {
+        $label = $product->getResource()->getAttribute($attributeCode)->getFrontend()->getValue($product);
+        $productModel = Mage::getModel('catalog/product');
+        $attr = $productModel->getResource()->getAttribute($attributeCode);
+
+        if ($attr->usesSource()) {
+            return $attr->getSource()->getOptionId($label);
+        }
+    }
+
+    protected function getDefaultOriginAddress()
+    {
+        return array(
+            'name'         => Mage::getStoreConfig('general/store_information/name'),
+            'phone_number' => Mage::getStoreConfig('general/store_information/phone'),
+            'street1'      => Mage::getStoreConfig('shipping/origin/street_line1'),
+            'street2'      => Mage::getStoreConfig('shipping/origin/street_line2'),
+            'city'         => Mage::getStoreConfig('shipping/origin/city'),
+            'state'        => Mage::getModel('directory/region')
+                                ->load(Mage::getStoreConfig('shipping/origin/region_id'))
+                                ->getCode(),
+            'country'      => Mage::getStoreConfig('shipping/origin/country_id'),
+            'zip'          => Mage::getStoreConfig('shipping/origin/postcode'),
+        );
+    }
+
 
     public function getAllowedMethods()
     {
@@ -217,7 +340,8 @@ class ShipHawk_MyCarrier_Model_Carrier
             'UPS Worldwide Express'                                         => 'UPS Worldwide Express',
             'UPS Worldwide Express Freight'                                 => 'UPS Worldwide Express Freight',
             'UPS Worldwide Express Plus'                                    => 'UPS Worldwide Express Plus',
-            'UPS Worldwide Saver'                                           => 'UPS Worldwide Saver'
+            'UPS Worldwide Saver'                                           => 'UPS Worldwide Saver',
+            'Multiple Carriers'                                             => 'Multiple Carriers'
         );
     }
 }

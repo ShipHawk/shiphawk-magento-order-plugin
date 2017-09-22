@@ -2,7 +2,7 @@
 <config>
     <modules>
         <Shiphawk_MyCarrier>
-            <module>2.0.0</module>
+            <version>2.4.3</version>
         </Shiphawk_MyCarrier>
     </modules>
     <global>
@@ -11,6 +11,17 @@
                 <class>Shiphawk_MyCarrier_Model</class>
             </shiphawk_mycarrier>
         </models>
+        <resources>
+            <shiphawk_mycarrier_setup>
+                <setup>
+                    <module>Shiphawk_MyCarrier</module>
+                    <class>Shiphawk_MyCarrier_Model_Resource_Mysql4_Setup</class>
+                </setup>
+                <connection>
+                    <use>core_setup</use>
+                </connection>
+            </shiphawk_mycarrier_setup>
+        </resources>
     </global>
     <!-- Default configuration -->
     <default>
