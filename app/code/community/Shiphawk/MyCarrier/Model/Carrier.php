@@ -26,7 +26,7 @@ class ShipHawk_MyCarrier_Model_Carrier
                 'destination_address' => $destination_address,
                 'items'               => $data['items'],
                 'apply_rules'         =>'true',
-                'carrier_type'        => $data['carrier_type']
+                'carrier_type_filter' => (count($data['carrier_type_filter']) > 0 ? $data['carrier_type_filter'] : null)
             );
 
             if (count($groupedItems) > 1){
@@ -114,7 +114,13 @@ class ShipHawk_MyCarrier_Model_Carrier
         $rate->setCarrierTitle($shRate->carrier);
         $rate->setMethod($shRate->service_name);
         // $rate->setMethod($shRate->carrier. '-' . $shRate->service_name);
-        $rate->setMethodTitle($shRate->service_name);
+
+        $service_title = $shRate->service_name;
+        if (substr($shRate->service_name, 0, strlen($shRate->carrier)) !== $shRate->carrier){
+            $service_title = $shRate->carrier . ' - ' . $shRate->service_name;
+        }
+
+        $rate->setMethodTitle($service_title);
 
         $rate->setCost($shRate->price);
 
@@ -185,19 +191,18 @@ class ShipHawk_MyCarrier_Model_Carrier
                 );
             }
 
-            $carrier_type = $this->getSelectAttributeValue($product, 'shiphawk_carrier_type');
-            $groupKey = $origin_address['zip'] . ' ' . $carrier_type;
+            $carrier_type = $this->getProductCarrierType($product);
+            $groupKey = $origin_address['zip'] . ' ' . implode(',', $carrier_type);
 
             if (!$itemsGrouped[$groupKey]){
                 $itemsGrouped[$groupKey] = array(
-                    'origin_address' => $origin_address,
-                    'carrier_type'   => $carrier_type,
-                    'items'          => array()
+                    'origin_address'      => $origin_address,
+                    'carrier_type_filter' => $carrier_type,
+                    'items'               => array()
                 );
             }
 
             $item_weight = $item->getWeight();
-
             $itemsGrouped[$groupKey]['items'][] = array(
                 'product_sku'        => $product->getData($skuColumn),
                 'quantity'           => $item->getQty(),
@@ -213,6 +218,28 @@ class ShipHawk_MyCarrier_Model_Carrier
         }
 
         return $itemsGrouped;
+
+    }
+
+    public function getProductCarrierType($product) {
+        $carrier_types =  explode(',', $product->getShiphawkCarrierType());
+
+        $attr = Mage::getModel('catalog/product')->getResource()->getAttribute('shiphawk_carrier_type');
+        $carrier_types_labels = array();
+
+        foreach($carrier_types as $carrier_type) {
+            if ($attr->usesSource()) {
+                $carrier_types_label = $attr->getSource()->getOptionText($carrier_type);
+
+                if(($carrier_types_label == 'All')||(!$carrier_types_label)) {
+                    return array();
+                }
+
+                $carrier_types_labels[] = $carrier_types_label;
+            }
+        }
+
+        return $carrier_types_labels;
 
     }
 
@@ -247,61 +274,165 @@ class ShipHawk_MyCarrier_Model_Carrier
     public function getAllowedMethods()
     {
         return array(
-            'FedEx 2 Day'                                                   => 'FedEx 2 Day',
-            'FedEx 2 Day Am'                                                => 'FedEx 2 Day Am',
-            'FedEx Express Saver'                                           => 'FedEx Express Saver',
-            'FedEx First Overnight'                                         => 'FedEx First Overnight',
-            'FedEx First Overnight Saturday Delivery'                       => 'FedEx First Overnight Saturday Delivery',
-            'FedEx Ground'                                                  => 'FedEx Ground',
-            'FedEx Ground Home Delivery'                                    => 'FedEx Ground Home Delivery',
-            'FedEx International Economy'                                   => 'FedEx International Economy',
-            'FedEx International First'                                     => 'FedEx International First',
-            'FedEx International Ground'                                    => 'FedEx International Ground',
-            'FedEx International Priority'                                  => 'FedEx International Priority',
-            'FedEx Priority Overnight'                                      => 'FedEx Priority Overnight',
-            'FedEx Priority Overnight Saturday Delivery'                    => 'FedEx Priority Overnight Saturday Delivery',
-            'FedEx Standard Overnight'                                      => 'FedEx Standard Overnight',
-            'First Class Mail International'                                => 'First Class Mail International',
-            'First Class Package International Service'                     => 'First Class Package International Service',
-            'First-Class Mail'                                              => 'First-Class Mail',
-            'Global Express Guaranteed'                                     => 'Global Express Guaranteed',
-            'Library Mail'                                                  => 'Library Mail',
-            'Media Mail'                                                    => 'Media Mail',
-            'Parcel Select Ground'                                          => 'Parcel Select Ground',
-            'Priority Mail'                                                 => 'Priority Mail',
-            'Priority Mail Express'                                         => 'Priority Mail Express',
-            'Priority Mail Express Flat Rate Envelope'                      => 'Priority Mail Express Flat Rate Envelope',
-            'Priority Mail Express Flat Rate Legal Envelope'                => 'Priority Mail Express Flat Rate Legal Envelope',
-            'Priority Mail Express International'                           => 'Priority Mail Express International',
-            'Priority Mail Express International Flat Rate Envelope'        => 'Priority Mail Express International Flat Rate Envelope',
-            'Priority Mail Express International Flat Rate Legal Envelope'  => 'Priority Mail Express International Flat Rate Legal Envelope',
-            'Priority Mail Express International Flat Rate Padded Envelope' => 'Priority Mail Express International Flat Rate Padded Envelope',
-            'Priority Mail Flat Rate Envelope'                              => 'Priority Mail Flat Rate Envelope',
-            'Priority Mail Flat Rate Legal Envelope'                        => 'Priority Mail Flat Rate Legal Envelope',
-            'Priority Mail International'                                   => 'Priority Mail International',
-            'Priority Mail International Flat Rate Envelope'                => 'Priority Mail International Flat Rate Envelope',
-            'Priority Mail International Flat Rate Legal Envelope'          => 'Priority Mail International Flat Rate Legal Envelope',
-            'Priority Mail International Flat Rate Padded Envelope'         => 'Priority Mail International Flat Rate Padded Envelope',
-            'Priority Mail International Large Flat Rate Box'               => 'Priority Mail International Large Flat Rate Box',
-            'Priority Mail International Medium Flat Rate Box'              => 'Priority Mail International Medium Flat Rate Box',
-            'Priority Mail International Small Flat Rate Box'               => 'Priority Mail International Small Flat Rate Box',
-            'Priority Mail Large Flat Rate Box'                             => 'Priority Mail Large Flat Rate Box',
-            'Priority Mail Medium Flat Rate Box'                            => 'Priority Mail Medium Flat Rate Box',
-            'Priority Mail Small Flat Rate Box'                             => 'Priority Mail Small Flat Rate Box',
-            'UPS Ground'                                                    => 'UPS Ground',
-            'UPS Next Day Air'                                              => 'UPS Next Day Air',
+            'Standard Freight Service'                                      => 'Standard Freight Service',
+            'UPS Worldwide Express Plus'                                    => 'UPS Worldwide Express Plus',
+            'UPS Second Day Air'                                            => 'UPS Second Day Air',
+            'UPS Three-Day Select'                                          => 'UPS Three-Day Select',
+            'UPS Second Day Air A.M.'                                       => 'UPS Second Day Air A.M.',
             'UPS Next Day Air Early'                                        => 'UPS Next Day Air Early',
             'UPS Next Day Air Saver'                                        => 'UPS Next Day Air Saver',
-            'UPS Second Day Air'                                            => 'UPS Second Day Air',
-            'UPS Second Day Air A.M.'                                       => 'UPS Second Day Air A.M.',
-            'UPS Standard'                                                  => 'UPS Standard',
+            'UPS Ground'                                                    => 'UPS Ground',
+            'UPS Next Day Air'                                              => 'UPS Next Day Air',
             'UPS SurePost'                                                  => 'UPS SurePost',
-            'UPS Three-Day Select'                                          => 'UPS Three-Day Select',
-            'UPS Worldwide Expedited'                                       => 'UPS Worldwide Expedited',
             'UPS Worldwide Express'                                         => 'UPS Worldwide Express',
             'UPS Worldwide Express Freight'                                 => 'UPS Worldwide Express Freight',
-            'UPS Worldwide Express Plus'                                    => 'UPS Worldwide Express Plus',
+            'UPS Standard'                                                  => 'UPS Standard',
+            'UPS Worldwide Expedited'                                       => 'UPS Worldwide Expedited',
             'UPS Worldwide Saver'                                           => 'UPS Worldwide Saver',
+            'FedEx Express Saver'                                           => 'FedEx Express Saver',
+            'FedEx 2 Day'                                                   => 'FedEx 2 Day',
+            'FedEx Priority Overnight Saturday Delivery'                    => 'FedEx Priority Overnight Saturday Delivery',
+            'FedEx Standard Overnight'                                      => 'FedEx Standard Overnight',
+            'FedEx Ground'                                                  => 'FedEx Ground',
+            'FedEx International Priority'                                  => 'FedEx International Priority',
+            'FedEx International First'                                     => 'FedEx International First',
+            'FedEx International Economy'                                   => 'FedEx International Economy',
+            'FedEx Ground Home Delivery'                                    => 'FedEx Ground Home Delivery',
+            'FedEx First Overnight Saturday Delivery'                       => 'FedEx First Overnight Saturday Delivery',
+            'FedEx First Overnight'                                         => 'FedEx First Overnight',
+            'FedEx 2 Day Am'                                                => 'FedEx 2 Day Am',
+            'FedEx SmartPost'                                               => 'FedEx SmartPost',
+            'FedEx 2 Day Saturday Delivery'                                 => 'FedEx 2 Day Saturday Delivery',
+            'FedEx International Ground'                                    => 'FedEx International Ground',
+            'FedEx Priority Overnight'                                      => 'FedEx Priority Overnight',
+            'Guaranteed Freight Service'                                    => 'Guaranteed Freight Service',
+            'Flatbed'                                                       => 'Flatbed',
+            'Premier'                                                       => 'Premier',
+            'Standard One Man'                                              => 'Standard One Man',
+            'Standard Two Man'                                              => 'Standard Two Man',
+            'Deluxe'                                                        => 'Deluxe',
+            'Basic'                                                         => 'Basic',
+            'Standard Transit Plus: 10AM'                                   => 'Standard Transit Plus: 10AM',
+            'Standard Transit Plus: 12PM Guaranteed'                        => 'Standard Transit Plus: 12PM Guaranteed',
+            'Standard Transit Plus: 12PM'                                   => 'Standard Transit Plus: 12PM',
+            'Standard Transit Plus: 5PM Guaranteed'                         => 'Standard Transit Plus: 5PM Guaranteed',
+            'Standard Transit Plus: 10AM Guaranteed'                        => 'Standard Transit Plus: 10AM Guaranteed',
+            'LTL Standard Transit: 5PM'                                     => 'LTL Standard Transit: 5PM',
+            'White Glove'                                                   => 'White Glove',
+            'Guaranteed Delivery by 5PM'                                    => 'Guaranteed Delivery by 5PM',
+            'RGN'                                                           => 'RGN',
+            'Stepdeck'                                                      => 'Stepdeck',
+            'Priority Mail International Medium Flat Rate Box'              => 'Priority Mail International Medium Flat Rate Box',
+            'Priority Mail International Large Flat Rate Box'               => 'Priority Mail International Large Flat Rate Box',
+            'Priority Mail International Flat Rate Envelope'                => 'Priority Mail International Flat Rate Envelope',
+            'Priority Mail Express International Flat Rate Envelope'        => 'Priority Mail Express International Flat Rate Envelope',
+            'Priority Mail International Flat Rate Legal Envelope'          => 'Priority Mail International Flat Rate Legal Envelope',
+            'Priority Mail Flat Rate Envelope'                              => 'Priority Mail Flat Rate Envelope',
+            'Priority Mail Express International Flat Rate Legal Envelope'  => 'Priority Mail Express International Flat Rate Legal Envelope',
+            'Global Express Guaranteed'                                     => 'Global Express Guaranteed',
+            'Priority Mail Express International'                           => 'Priority Mail Express International',
+            'Priority Mail Large Flat Rate Box'                             => 'Priority Mail Large Flat Rate Box',
+            'Priority Mail International'                                   => 'Priority Mail International',
+            'First Class Mail International'                                => 'First Class Mail International',
+            'Priority Mail International Flat Rate Padded Envelope'         => 'Priority Mail International Flat Rate Padded Envelope',
+            'Priority Mail Express International Flat Rate Padded Envelope' => 'Priority Mail Express International Flat Rate Padded Envelope',
+            'Priority Mail Medium Flat Rate Box'                            => 'Priority Mail Medium Flat Rate Box',
+            'Priority Mail Small Flat Rate Box'                             => 'Priority Mail Small Flat Rate Box',
+            'First Class Package International Service'                     => 'First Class Package International Service',
+            'Priority Mail Flat Rate Padded Envelope'                       => 'Priority Mail Flat Rate Padded Envelope',
+            'Priority Mail International Small Flat Rate Box'               => 'Priority Mail International Small Flat Rate Box',
+            'Priority Mail Regional Rate Box A'                             => 'Priority Mail Regional Rate Box A',
+            'Priority Mail'                                                 => 'Priority Mail',
+            'Priority Mail Regional Rate Box B'                             => 'Priority Mail Regional Rate Box B',
+            'Priority Mail Express Flat Rate Envelope'                      => 'Priority Mail Express Flat Rate Envelope',
+            'Priority Mail Flat Rate Legal Envelope'                        => 'Priority Mail Flat Rate Legal Envelope',
+            'Priority Mail Express'                                         => 'Priority Mail Express',
+            'Parcel Select Ground'                                          => 'Parcel Select Ground',
+            'Priority Mail Express Flat Rate Legal Envelope'                => 'Priority Mail Express Flat Rate Legal Envelope',
+            'Media Mail'                                                    => 'Media Mail',
+            'Library Mail'                                                  => 'Library Mail',
+            'First-Class Mail'                                              => 'First-Class Mail',
+            'Standard Courier Service'                                      => 'Standard Courier Service',
+            'Standard Vehicle Service'                                      => 'Standard Vehicle Service',
+            'Local Delivery'                                                => 'Local Delivery',
+            'FedEx Freight Economy'                                         => 'FedEx Freight Economy',
+            'FedEx Freight Priority'                                        => 'FedEx Freight Priority',
+            'White Glove'                                                   => 'White Glove',
+            'UPS Freight LTL'                                               => 'UPS Freight LTL',
+            'UPS Freight LTL - Guaranteed'                                  => 'UPS Freight LTL - Guaranteed',
+            'UPS Freight LTL - Guaranteed A.M.'                             => 'UPS Freight LTL - Guaranteed A.M.',
+            'UPS Standard LTL'                                              => 'UPS Standard LTL',
+            'Basic Service Delivery'                                        => 'Basic Service Delivery',
+            'Premier Service Delivery'                                      => 'Premier Service Delivery',
+            'Room of Choice'                                                => 'Room of Choice',
+            'Over the Threshold'                                            => 'Over the Threshold',
+            'Deluxed Delivery'                                              => 'Deluxed Delivery',
+            'Threshold'                                                     => 'Threshold',
+            'Premium'                                                       => 'Premium',
+            'White Glove Delivery'                                          => 'White Glove Delivery',
+            'Same-Day Freight Service'                                      => 'Same-Day Freight Service',
+            'FedEx 1 Day Freight Saturday Delivery'                         => 'FedEx 1 Day Freight Saturday Delivery',
+            'FedEx 2 Day Freight'                                           => 'FedEx 2 Day Freight',
+            'FedEx 3 Day Freight'                                           => 'FedEx 3 Day Freight',
+            'FedEx 1 Day Freight'                                           => 'FedEx 1 Day Freight',
+            'White Glove - 15 Min. Set Up and Assembly'                     => 'White Glove - 15 Min. Set Up and Assembly',
+            'Threshold Delivery'                                            => 'Threshold Delivery',
+            'White Glove - 2 Man Service'                                   => 'White Glove - 2 Man Service',
+            'White Glove - 1 Man Service'                                   => 'White Glove - 1 Man Service',
+            'Curbside Delivery'                                             => 'Curbside Delivery',
+            'Threshold Delivery - 2 Man Service'                            => 'Threshold Delivery - 2 Man Service',
+            'JETLINE'                                                       => 'JETLINE',
+            'EXPRESS 10:30'                                                 => 'EXPRESS 10:30',
+            'DOMESTIC EXPRESS'                                              => 'DOMESTIC EXPRESS',
+            'ECONOMY SELECT'                                                => 'ECONOMY SELECT',
+            'EXPRESS 9:00'                                                  => 'EXPRESS 9:00',
+            'EXPRESS EASY'                                                  => 'EXPRESS EASY',
+            'FREIGHT WORLDWIDE'                                             => 'FREIGHT WORLDWIDE',
+            'EXPRESS WORLDWIDE'                                             => 'EXPRESS WORLDWIDE',
+            'EXPRESS 12:00'                                                 => 'EXPRESS 12:00',
+            'Sunrise'                                                       => 'Sunrise',
+            'Same Day'                                                      => 'Same Day',
+            'Ground'                                                        => 'Ground',
+            'Palletized Freight'                                            => 'Palletized Freight',
+            'Sunrise Gold'                                                  => 'Sunrise Gold',
+            '3 Day Delivery'                                                => '3 Day Delivery',
+            '2 Day Delivery'                                                => '2 Day Delivery',
+            'Next Day AM Delivery'                                          => 'Next Day AM Delivery',
+            'Economy Service'                                               => 'Economy Service',
+            'Next Day PM Delivery'                                          => 'Next Day PM Delivery',
+            'Threshold Delivery - 3 Day'                                    => 'Threshold Delivery - 3 Day',
+            'Threshold Delivery - 4 Day'                                    => 'Threshold Delivery - 4 Day',
+            'Threshold Delivery - 5 Day'                                    => 'Threshold Delivery - 5 Day',
+            'White Glove Delivery - 1 Day'                                  => 'White Glove Delivery - 1 Day',
+            'White Glove Delivery - 2 Day'                                  => 'White Glove Delivery - 2 Day',
+            'White Glove Delivery - 3 Day'                                  => 'White Glove Delivery - 3 Day',
+            'White Glove Delivery - 4 Day'                                  => 'White Glove Delivery - 4 Day',
+            'White Glove Delivery - 5 Day'                                  => 'White Glove Delivery - 5 Day',
+            'Room of Choice – 5 Day'                                        => 'Room of Choice – 5 Day',
+            'White Glove Premier - Domestic Heavyweight 150+'               => 'White Glove Premier - Domestic Heavyweight 150+',
+            'Ground Package (3-5) - Domestic Heavyweight 150+'              => 'Ground Package (3-5) - Domestic Heavyweight 150+',
+            'Surface Express (3-5 days) - Domestic Heavyweight 150+'        => 'Surface Express (3-5 days) - Domestic Heavyweight 150+',
+            'Less Than TruckLoad'                                           => 'Less Than TruckLoad',
+            'Deferred Service (3-5 days) - Domestic Heavyweight 150+'       => 'Deferred Service (3-5 days) - Domestic Heavyweight 150+',
+            '3 Day - Domestic Heavyweight 150+'                             => '3 Day - Domestic Heavyweight 150+',
+            'Next Day Standard (before 5pm) - Domestic Heavyweight 150+'    => 'Next Day Standard (before 5pm) - Domestic Heavyweight 150+',
+            'Next Day AM (before noon) - Domestic Heavyweight 150+'         => 'Next Day AM (before noon) - Domestic Heavyweight 150+',
+            'Next Flight Out - Domestic Heavyweight 150+'                   => 'Next Flight Out - Domestic Heavyweight 150+',
+            'Same Day - Domestic Heavyweight 150+'                          => 'Same Day - Domestic Heavyweight 150+',
+            'Next Day Overnight by 10:30am - Small Package 1-150'           => 'Next Day Overnight by 10:30am - Small Package 1-150',
+            '2 Day - Small Package 1-150'                                   => '2 Day - Small Package 1-150',
+            '3 Day - Small Package 1-150'                                   => '3 Day - Small Package 1-150',
+            'Threshold Delivery - 1 Day'                                    => 'Threshold Delivery - 1 Day',
+            'Threshold Delivery - 2 Day'                                    => 'Threshold Delivery - 2 Day',
+            '2 Day - Domestic Heavyweight 150+'                             => '2 Day - Domestic Heavyweight 150+',
+            'White Glove Classic - Domestic Heavyweight 150+'               => 'White Glove Classic - Domestic Heavyweight 150+',
+            'White Glove Signature - Domestic Heavyweight 150+'             => 'White Glove Signature - Domestic Heavyweight 150+',
+            'Next Day Overnight by 8:30am - Small Package 1-150'            => 'Next Day Overnight by 8:30am - Small Package 1-150',
+            'Next Day Standard (before 5pm) - Small Package 1-150'          => 'Next Day Standard (before 5pm) - Small Package 1-150',
+            '4 Day - Domestic Heavyweight 150+'                             => '4 Day - Domestic Heavyweight 150+',
+            '2 Day AM (before noon) - Domestic Heavyweight 150+'            => '2 Day AM (before noon) - Domestic Heavyweight 150+',
+            'Standard Delivery'                                             => 'Standard Delivery',
+            'Will Call'                                                     => 'Will Call',
             'Multiple Carriers'                                             => 'Multiple Carriers'
         );
     }
