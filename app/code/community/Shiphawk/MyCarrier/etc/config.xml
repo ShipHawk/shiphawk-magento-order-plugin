@@ -2,7 +2,7 @@
 <config>
     <modules>
         <Shiphawk_MyCarrier>
-            <version>2.4.7</version>
+            <version>2.5.0</version>
         </Shiphawk_MyCarrier>
     </modules>
     <global>
@@ -23,6 +23,29 @@
             </shiphawk_mycarrier_setup>
         </resources>
     </global>
+
+    <adminhtml>
+        <layout>
+            <updates>
+                <shiphawk_mycarrier>
+                    <file>shiphawk.xml</file>
+                </shiphawk_mycarrier>
+            </updates>
+        </layout>
+    </adminhtml>
+
+     <frontend>
+       <routers>
+          <routeurfrontend>
+              <use>standard</use>
+              <args>
+                 <module>Shiphawk_MyCarrier</module>
+                 <frontName>shiphawk</frontName>
+              </args>
+           </routeurfrontend>
+       </routers>
+    </frontend>
+
     <!-- Default configuration -->
     <default>
         <carriers>

@@ -9,7 +9,7 @@ if ($incorrect_attr->getId()) {
 
   if ($correct_attr->getId()) {
     $installer->updateAttribute('catalog_product', ' shiphawk_height',    'attribute_code', 'old_shiphawk_height');
-    $installer->updateAttribute('catalog_product', 'old_shiphawk_height', 'label',          'Old Height');
+    $installer->updateAttribute('catalog_product', 'old_shiphawk_height', 'frontend_label', 'Old Height');
   } else {
     $installer->updateAttribute('catalog_product', ' shiphawk_height', 'attribute_code', 'shiphawk_height');
   }

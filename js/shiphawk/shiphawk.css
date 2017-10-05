@@ -1,0 +1,14 @@
+#shiphawk_type_of_product_value {
+    display: none;
+}
+
+.type_link:hover {
+    text-decoration: underline;
+    cursor: pointer;
+}
+
+#type_product {
+    position: absolute;
+    z-index: 99;
+    background-color: #ffffff;
+}
