@@ -194,7 +194,7 @@ class ShipHawk_MyCarrier_Model_Carrier
             $carrier_type = $this->getProductCarrierType($product);
             $groupKey = $origin_address['zip'] . ' ' . implode(',', $carrier_type);
 
-            if (!$itemsGrouped[$groupKey]){
+            if (!array_key_exists($groupKey, $itemsGrouped)){
                 $itemsGrouped[$groupKey] = array(
                     'origin_address'      => $origin_address,
                     'carrier_type_filter' => $carrier_type,

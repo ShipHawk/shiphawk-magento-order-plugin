@@ -19,7 +19,12 @@ class Shiphawk_Order_Model_Command_SendOrder
 
         $SHRates = Mage::getSingleton('core/session')->getSHRateAarray();
         foreach($SHRates as $rateRow){
-            if(($rateRow->carrier . ' - ' . $rateRow->service_name)  == $order->getShippingDescription()){
+            $sh_service_title = $rateRow->service_name;
+            if (substr($rateRow->service_name, 0, strlen($rateRow->carrier)) !== $rateRow->carrier){
+                $sh_service_title = $rateRow->carrier . ' - ' . $rateRow->service_name;
+            }
+
+            if(($rateRow->carrier . ' - ' . $sh_service_title)  == $order->getShippingDescription()){
                 $shippingRateId = $rateRow->id;
             }
         }

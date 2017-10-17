@@ -25,7 +25,7 @@ class Shiphawk_Order_Model_Command_UpdateOrder
             )
         );
 
-        Mage::log('ShipHawk Request: ' . $client->getUri(true) . $orderRequest, Zend_Log::INFO, 'shiphawk_order.log', true);
+        Mage::log('ShipHawk Request: ' . $client->getUri(true) . ' Body:' . $orderRequest, Zend_Log::INFO, 'shiphawk_order.log', true);
         $client->setRawData($orderRequest, 'application/json');
         try {
             $response = $client->request(Zend_Http_Client::POST);

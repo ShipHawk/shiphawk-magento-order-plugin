@@ -35,7 +35,7 @@ class Shiphawk_MyCarrier_IndexController extends Mage_Core_Controller_Front_Acti
          }
         }else{
             foreach ((array) $arr_res as $el) {
-                $responce_array[$el->id] = $el->name.' ('.$el->category_name. ' - ' . $el->subcategory->name . ')';
+                $responce_array[$el->id] = $el->name.' ('.$el->category. ' - ' . $el->subcategory_name . ')';
             }
 
             $responce_html="<ul>";
