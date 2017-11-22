@@ -25,7 +25,8 @@ class ShipHawk_MyCarrier_Model_Carrier
                 'origin_address'      => $data['origin_address'],
                 'destination_address' => $destination_address,
                 'items'               => $data['items'],
-                'apply_rules'         =>'true',
+                'apply_rules'         => 'true',
+                'display_rate_detail' => 'true',
                 'carrier_type_filter' => (count($data['carrier_type_filter']) > 0 ? $data['carrier_type_filter'] : null)
             );
 
@@ -33,7 +34,10 @@ class ShipHawk_MyCarrier_Model_Carrier
                 $rateRequest['rate_filter'] = 'best';
             }
 
-            $rateResponsesArray[] = $this->getRates($rateRequest);
+            $rateResponsesArray[] = array(
+                'data'     => $data,
+                'response' => $this->getRates($rateRequest)
+            );
         }
 
         $rateArray = new stdClass;
@@ -44,10 +48,15 @@ class ShipHawk_MyCarrier_Model_Carrier
             $combinedRate = $this->_buildCombinedRate();
 
             foreach ( $rateResponsesArray as $rateResponse ) {
-                if($rateResponse && $rateResponse->isSuccessful()) {
-                    $rate = json_decode($rateResponse->getBody())->rates[0];
+                if($rateResponse && $rateResponse['response'] && $rateResponse['response']->isSuccessful()) {
+                    $rate = json_decode($rateResponse['response']->getBody())->rates[0];
                     $partialRatesArray[] = $rate;
-                    $combinedRate->price += $rate->price;
+
+                    // apply markup to the single rate
+                    $price = $this->getTotalPriceFromDetailedResponse($rate);
+                    $price = $this->shippingPriceWithMarkup($price, $rateResponse['data']['flat_markup'], $rateResponse['data']['percent_markup']);
+
+                    $combinedRate->price += $price;
                     $combinedRate->id[] = $rate->id;
                     $combinedRate->est_delivery_date = $rate->est_delivery_date;
                 }
@@ -58,8 +67,15 @@ class ShipHawk_MyCarrier_Model_Carrier
             }
         } else {
             $rateResponse = $rateResponsesArray[0];
-            if($rateResponse && $rateResponse->isSuccessful()) {
-                $rateArray = json_decode($rateResponse->getBody());
+            if($rateResponse && $rateResponse['response'] && $rateResponse['response']->isSuccessful()) {
+                $rateArray = json_decode($rateResponse['response']->getBody());
+
+                // apply markup to the rates
+                foreach ($rateArray->rates as $rate)
+                {
+                    $price = $this->getTotalPriceFromDetailedResponse($rate);
+                    $rate->price = $this->shippingPriceWithMarkup($price, $rateResponse['data']['flat_markup'], $rateResponse['data']['percent_markup']);
+                }
             }
         }
 
@@ -194,11 +210,18 @@ class ShipHawk_MyCarrier_Model_Carrier
             $carrier_type = $this->getProductCarrierType($product);
             $groupKey = $origin_address['zip'] . ' ' . implode(',', $carrier_type);
 
+            $groupKey .= ', flat_markup=' . $product->getData('shiphawk_discount_fixed');
+            $groupKey .= ', percent_markup=' . $product->getData('shiphawk_discount_percentage');
+
             if (!array_key_exists($groupKey, $itemsGrouped)){
                 $itemsGrouped[$groupKey] = array(
                     'origin_address'      => $origin_address,
                     'carrier_type_filter' => $carrier_type,
-                    'items'               => array()
+                    'flat_markup'         => $product->getData('shiphawk_discount_fixed'),
+                    'percent_markup'      => $product->getData('shiphawk_discount_percentage'),
+                    'items'               => array(),
+                    'flat_markup'         => $product->getData('shiphawk_discount_fixed'),
+                    'percent_markup'      => $product->getData('shiphawk_discount_percentage')
                 );
             }
 
@@ -218,9 +241,14 @@ class ShipHawk_MyCarrier_Model_Carrier
                 $handling_unit_type = 'box';
             }
 
+            $shiphawk_quantity = 1;
+            if (intval($product->getData('shiphawk_quantity'))>0) {
+                $shiphawk_quantity = intval($product->getData('shiphawk_quantity'));
+            }
+
             $itemsGrouped[$groupKey]['items'][] = array(
                 'product_sku'           => $product->getData($skuColumn),
-                'quantity'              => $item->getQty(),
+                'quantity'              => $shiphawk_quantity * $item->getQty(),
                 'value'                 => $product->getData('shiphawk_item_value') ? $product->getData('shiphawk_item_value') : $itemObject->getPrice(),
                 'length'                => $product->getData('shiphawk_length')     ? $product->getData('shiphawk_length')     : $itemObject->getLength(),
                 'width'                 => $product->getData('shiphawk_width')      ? $product->getData('shiphawk_width')      : $itemObject->getWidth(),
@@ -285,6 +313,37 @@ class ShipHawk_MyCarrier_Model_Carrier
             'country'      => Mage::getStoreConfig('shipping/origin/country_id'),
             'zip'          => Mage::getStoreConfig('shipping/origin/postcode'),
         );
+    }
+
+    protected function shippingPriceWithMarkup($shPrice, $flatMarkup, $percentMarkup)
+    {
+        $price = $shPrice;
+
+        if ($flatMarkup) {
+            $price += floatval($flatMarkup);
+        } elseif ($percentMarkup) {
+            $price += $price * floatval($percentMarkup) / 100;
+        }
+
+        if ($price < 0) {
+            return 0;
+        } else {
+            return $price;
+        }
+    }
+
+    protected function getTotalPriceFromDetailedResponse($shRate)
+    {
+        $priceDetails = $shRate->rate_detail->proposed_shipments[0]->price_details;
+
+        $totalPrice = $priceDetails->shipping;
+        $totalPrice += $priceDetails->packing;
+        $totalPrice += $priceDetails->insurance;
+        $totalPrice += $priceDetails->accessorials;
+        $totalPrice += $priceDetails->duties;
+        $totalPrice += $priceDetails->taxes;
+
+        return $totalPrice;
     }
 
 
