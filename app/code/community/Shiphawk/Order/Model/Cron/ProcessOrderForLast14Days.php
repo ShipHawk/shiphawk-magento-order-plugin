@@ -1,5 +1,5 @@
 <?php
-
+// Disabled - removed from config.xml
 class Shiphawk_Order_Model_Cron_ProcessOrderForLast14Days
 {
     public function run()

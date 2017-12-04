@@ -52,6 +52,9 @@ class Shiphawk_MyCarrier_IndexController extends Mage_Core_Controller_Front_Acti
     public function trackingAction() {
         $api_key_from_url = $this->getRequest()->getParam('api_key');
         $data_from_shiphawk = json_decode(file_get_contents('php://input'));
+
+        Mage::log('DataFromShipHawk: ' . var_export($data_from_shiphawk, true), Zend_Log::INFO, 'shiphawk_tracking.log', true);
+
         $api_key = Mage::getStoreConfig('shiphawk/order/api_key');
 
         //curl -X POST -H Content-Type:application/json -d '{"event":"shipment.status_update","status":"in_transit","updated_at":"2017-11-22T10:23:16.702-08:00","shipment_id":1014270}' http://magento/index.php/shiphawk/index/tracking?api_key=secret
@@ -63,10 +66,9 @@ class Shiphawk_MyCarrier_IndexController extends Mage_Core_Controller_Front_Acti
 
                 $shipment = Mage::getModel('sales/order_shipment')->loadByIncrementId($shipment_increment_id);
 
-                Mage::log('DataFromShipHawk: ' . var_export($data_from_shiphawk, true), Zend_Log::INFO, 'shiphawk_tracking.log', true);
+                $email_shipment_status_updates = Mage::getStoreConfig('carriers/shiphawk_mycarrier/email_shipment_status_updates');
+                $email_tracking_url_updates = Mage::getStoreConfig('carriers/shiphawk_mycarrier/email_tracking_url_updates');
 
-                $email_shipment_status_updates = Mage::getStoreConfig('shiphawk/order/email_shipment_status_updates');
-                $email_tracking_url_updates = Mage::getStoreConfig('shiphawk/order/email_tracking_url_updates');
                 $comment = '';
 
                 $event_created_at = $this->convertDateTime($data_from_shiphawk['updated_at']);

@@ -2,7 +2,7 @@
 <config>
     <modules>
         <Shiphawk_Order>
-            <version>2.0.0</version>
+            <version>2.1.0</version>
         </Shiphawk_Order>
     </modules>
     <global>
@@ -102,16 +102,4 @@
             </resources>
         </acl>
     </adminhtml>
-    <crontab>
-        <jobs>
-            <shiphawk_order_procces_14days>
-                <schedule>
-                    <cron_expr>* * */1 * *</cron_expr>
-                </schedule>
-                <run>
-                    <model>shiphawk_order/cron_processOrderForLast14Days::run</model>
-                </run>
-            </shiphawk_order_procces_14days>
-        </jobs>
-    </crontab>
 </config>
