@@ -2,7 +2,7 @@
 <config>
     <modules>
         <Shiphawk_MyCarrier>
-            <module>2.0.0</module>
+            <version>2.8.1</version>
         </Shiphawk_MyCarrier>
     </modules>
     <global>
@@ -11,7 +11,41 @@
                 <class>Shiphawk_MyCarrier_Model</class>
             </shiphawk_mycarrier>
         </models>
+        <resources>
+            <shiphawk_mycarrier_setup>
+                <setup>
+                    <module>Shiphawk_MyCarrier</module>
+                    <class>Shiphawk_MyCarrier_Model_Resource_Mysql4_Setup</class>
+                </setup>
+                <connection>
+                    <use>core_setup</use>
+                </connection>
+            </shiphawk_mycarrier_setup>
+        </resources>
     </global>
+
+    <adminhtml>
+        <layout>
+            <updates>
+                <shiphawk_mycarrier>
+                    <file>shiphawk.xml</file>
+                </shiphawk_mycarrier>
+            </updates>
+        </layout>
+    </adminhtml>
+
+     <frontend>
+       <routers>
+          <routeurfrontend>
+              <use>standard</use>
+              <args>
+                 <module>Shiphawk_MyCarrier</module>
+                 <frontName>shiphawk</frontName>
+              </args>
+           </routeurfrontend>
+       </routers>
+    </frontend>
+
     <!-- Default configuration -->
     <default>
         <carriers>
@@ -43,6 +77,9 @@
                     in system.xml
                 -->
                 <sallowspecific>0</sallowspecific>
+
+                <email_shipment_status_updates>0</email_shipment_status_updates>
+                <email_tracking_url_updates>0</email_tracking_url_updates>
             </shiphawk_mycarrier>
         </carriers>
     </default>

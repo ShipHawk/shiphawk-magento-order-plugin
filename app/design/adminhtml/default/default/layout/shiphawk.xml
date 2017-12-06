@@ -1,0 +1,63 @@
+<?xml version="1.0"?>
+<layout version="0.1.0">
+
+    <adminhtml_catalog_product_edit>
+
+        <reference name="head">
+            <action method="addItem">
+                <type>js</type>
+                <name>shiphawk/shiphawk.js</name>
+
+                <aParams>id="shiphawkjsfile"</aParams>
+            </action>
+
+            <action method="addItem"><type>js_css</type><name>shiphawk/shiphawk.css</name></action>
+
+        </reference>
+        <reference name="content">
+            <block type="core/template" name="shiphawkjsfile" template="shiphawk/shiphawkjsfile.phtml"/>
+        </reference>
+    </adminhtml_catalog_product_edit>
+
+    <adminhtml_catalog_product_action_attribute_edit>
+
+        <reference name="head">
+
+            <action method="addItem">
+                <type>js</type>
+                <name>shiphawk/shiphawk.js</name>
+                <aParams>id="shiphawkjsfile"</aParams>
+            </action>
+
+            <action method="addItem">
+                <type>js_css</type>
+                <name>shiphawk/shiphawk.css</name>
+            </action>
+
+        </reference>
+        <reference name="content">
+            <block type="core/template" name="shiphawkjsfile" template="shiphawk/shiphawkjsfile.phtml"/>
+        </reference>
+    </adminhtml_catalog_product_action_attribute_edit>
+
+    <adminhtml_catalog_product_new>
+        <reference name="head">
+
+            <action method="addItem">
+                <type>js</type>
+                <name>shiphawk/shiphawk.js</name>
+                <aParams>id="shiphawkjsfile"</aParams>
+            </action>
+
+            <action method="addItem">
+                <type>js_css</type>
+                <name>shiphawk/shiphawk.css</name>
+            </action>
+
+        </reference>
+        <reference name="content">
+            <block type="core/template" name="shiphawkjsfile" template="shiphawk/shiphawkjsfile.phtml"/>
+        </reference>
+    </adminhtml_catalog_product_new>
+</layout>
+
