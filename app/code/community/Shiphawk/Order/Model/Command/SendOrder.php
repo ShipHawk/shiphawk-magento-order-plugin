@@ -18,6 +18,7 @@ class Shiphawk_Order_Model_Command_SendOrder
         Mage::log(Mage::getSingleton('core/session')->getSHRateAarray());
 
         $SHRates = Mage::getSingleton('core/session')->getSHRateAarray();
+
         foreach($SHRates as $rateRow){
             $sh_service_title = $rateRow->service_name;
             if (substr($rateRow->service_name, 0, strlen($rateRow->carrier)) !== $rateRow->carrier){
@@ -86,8 +87,13 @@ class Shiphawk_Order_Model_Command_SendOrder
         $client->setRawData($orderRequest, 'application/json');
         try {
             $response = $client->request(Zend_Http_Client::POST);
-            Mage::log('ShipHawk Response: ' . var_export($response, true), Zend_Log::INFO, 'shiphawk_order.log', true);
+            $responseArray = json_decode($response->getBody());
+            $shiphawkOrderId = $responseArray->id;
+
+            $order->setShiphawkOrderId($shiphawkOrderId);
         } catch (Exception $e) {
+            Mage::log('Error when setting attribute: ' . var_export($e, true), Zend_Log::INFO, 'shiphawk_order.log', true);
+
             Mage::logException($e);
         }
     }

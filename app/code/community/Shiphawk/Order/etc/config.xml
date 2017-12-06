@@ -102,4 +102,16 @@
             </resources>
         </acl>
     </adminhtml>
+    <crontab>
+        <jobs>
+            <shiphawk_order_sync_last_day>
+                <schedule>
+                    <cron_expr>*/15 * * * *</cron_expr>
+                </schedule>
+                <run>
+                    <model>shiphawk_order/cron_syncOrdersForLastDay::run</model>
+                </run>
+            </shiphawk_order_sync_last_day>
+        </jobs>
+    </crontab>
 </config>
