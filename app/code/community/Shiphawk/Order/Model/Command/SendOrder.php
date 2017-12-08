@@ -10,6 +10,7 @@ class Shiphawk_Order_Model_Command_SendOrder
         $client = new Zend_Http_Client($url . 'orders');
         $client->setHeaders('X-Api-Key', $key);
 
+        $send_items_as_unpacked = Mage::getStoreConfig('carriers/shiphawk_mycarrier/send_items_as_unpacked');
 
         $itemsRequest = [];
         $shippingRateId = '';
@@ -47,6 +48,23 @@ class Shiphawk_Order_Model_Command_SendOrder
             $product_id = $item->getProductId();
             $product = Mage::getModel('catalog/product')->load($product_id);
             $item_weight = $item->getWeight();
+
+            if ($send_items_as_unpacked) {
+                $item_type = 'unpacked';
+            } else {
+                $item_type = $item_weight <= 70 ? 'parcel' : 'handling_unit';
+            }
+
+            $weight = $item_weight;
+            if ($item_type == 'parcel') {
+                $weight *= 16;
+            }
+
+            $handling_unit_type = '';
+            if ($item_type == 'handling_unit'){
+                $handling_unit_type = 'box';
+            }
+
             $itemsRequest[] = array(
                 'name' => $item->getName(),
                 'sku' => $product->getData($skuColumn),
@@ -55,10 +73,10 @@ class Shiphawk_Order_Model_Command_SendOrder
                 'length' => $item->getLength(),
                 'width' => $item->getWidth(),
                 'height' => $item->getHeight(),
-                'weight' => $item_weight <= 70 ? $item_weight * 16 : $item_weight,
+                'weight' => $weight,
                 'can_ship_parcel' => true,
-                'item_type' => $item_weight <= 70 ? 'parcel' : 'handling_unit',
-                'handling_unit_type' => $item_weight <= 70 ? '' : 'box',
+                'item_type' => $item_type,
+                'handling_unit_type' => $handling_unit_type,
                 'source_system_id' => $item->getItemId()
             );
         }
