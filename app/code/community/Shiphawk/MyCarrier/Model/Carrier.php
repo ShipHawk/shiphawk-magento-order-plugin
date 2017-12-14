@@ -179,6 +179,8 @@ class ShipHawk_MyCarrier_Model_Carrier
         $skuColumn = Mage::getStoreConfig('shiphawk/datamapping/sku_column');
         Mage::log('getting sku from column: ' . $skuColumn, Zend_Log::INFO, 'shiphawk_rates.log', true);
 
+        $send_items_as_unpacked = Mage::getStoreConfig('carriers/shiphawk_mycarrier/send_items_as_unpacked');
+
         foreach ($request->getAllItems() as $item) {
             if ($item->getProduct()->isVirtual() || $item->getParentItem()) {
               continue;
@@ -230,9 +232,11 @@ class ShipHawk_MyCarrier_Model_Carrier
 
             $is_packed = ($product->getData('shiphawk_item_is_packed') == 1);
 
-            if ( !$is_packed && $product->getData('shiphawk_type_of_product_value') && $product->getData('shiphawk_type_of_product')){
+            if ($send_items_as_unpacked) {
                 $item_type = 'unpacked';
-                $product->getData('shiphawk_type_of_product_value');
+
+            } elseif ( !$is_packed && $product->getData('shiphawk_type_of_product_value') && $product->getData('shiphawk_type_of_product')){
+                $item_type = 'unpacked';
             } else {
                 $item_type = $item_weight <= 70 ? 'parcel' : 'handling_unit';
             }
@@ -247,15 +251,23 @@ class ShipHawk_MyCarrier_Model_Carrier
                 $shiphawk_quantity = intval($product->getData('shiphawk_quantity'));
             }
 
+            $value = $product->getData('shiphawk_item_value') ? $product->getData('shiphawk_item_value') : $itemObject->getPrice();
+            $quantity = $shiphawk_quantity * $item->getQty();
+
+            $weight = $item_weight;
+            if ($item_type == 'parcel') {
+                $weight *= 16;
+            }
+
             $itemsGrouped[$groupKey]['items'][] = array(
                 'product_sku'           => $product->getData($skuColumn),
-                'quantity'              => $shiphawk_quantity * $item->getQty(),
-                'value'                 => $product->getData('shiphawk_item_value') ? $product->getData('shiphawk_item_value') : $itemObject->getPrice(),
-                'length'                => $product->getData('shiphawk_length')     ? $product->getData('shiphawk_length')     : $itemObject->getLength(),
-                'width'                 => $product->getData('shiphawk_width')      ? $product->getData('shiphawk_width')      : $itemObject->getWidth(),
-                'height'                => $product->getData('shiphawk_height')     ? $product->getData('shiphawk_height')     : $itemObject->getHeight(),
+                'quantity'              => $quantity,
+                'value'                 => $value,
+                'length'                => $product->getData('shiphawk_length') ? $product->getData('shiphawk_length') : $itemObject->getLength(),
+                'width'                 => $product->getData('shiphawk_width')  ? $product->getData('shiphawk_width')  : $itemObject->getWidth(),
+                'height'                => $product->getData('shiphawk_height') ? $product->getData('shiphawk_height') : $itemObject->getHeight(),
                 'freight_class'         => $this->getSelectAttributeValue($product, 'shiphawk_freight_class'),
-                'weight'                => $item_weight <= 70 ? $item_weight * 16 : $item_weight,
+                'weight'                => $weight,
                 // 'item_type'             => $item_type,
                 'type'                  => $item_type,
                 'handling_unit_type'    => $handling_unit_type,
