@@ -207,6 +207,7 @@ class ShipHawk_MyCarrier_Model_Carrier
                     'state'        => $this->getSelectAttributeValue($product, 'shiphawk_origin_state'),
                     'country'      => 'US',
                     'zip'          => $product->getData('shiphawk_origin_zipcode'),
+                    'email'        => $product->getData('shiphawk_origin_email')
                 );
             }
 
