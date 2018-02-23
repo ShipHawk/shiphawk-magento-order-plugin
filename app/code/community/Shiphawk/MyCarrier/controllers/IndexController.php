@@ -22,7 +22,7 @@ class Shiphawk_MyCarrier_IndexController extends Mage_Core_Controller_Front_Acti
         $resp = curl_exec($curl);
         $arr_res = json_decode($resp);
 
-        $responce_array = array();
+        $itemTypes = array();
         $responce = array();
 
         if(is_object($arr_res)) {
@@ -32,13 +32,13 @@ class Shiphawk_MyCarrier_IndexController extends Mage_Core_Controller_Front_Acti
          }
         }else{
             foreach ((array) $arr_res as $el) {
-                $responce_array[$el->id] = $el->name.' ('.$el->category. ' - ' . $el->subcategory_name . ')';
+                $itemTypes[$el->id] = $el->name.' ('.$el->category. ' - ' . $el->subcategory_name . ')';
             }
 
             $responce_html="<ul>";
 
-            foreach($responce_array as $key=>$value) {
-                $responce_html .='<li class="type_link" id='.$key.' onclick="setItemid(this)" >'.$value.'</li>';
+            foreach($itemTypes as $id => $name) {
+                $responce_html .='<li class="shiphawk_item_type_label" data-type-id='. $id .' onclick="setItemid(this)" >'.$name.'</li>';
             }
 
             $responce_html .="</ul>";

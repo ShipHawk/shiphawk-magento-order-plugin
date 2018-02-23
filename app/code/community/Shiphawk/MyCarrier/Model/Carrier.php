@@ -235,11 +235,10 @@ class ShipHawk_MyCarrier_Model_Carrier
 
             if ($send_items_as_unpacked) {
                 $item_type = 'unpacked';
-
-            } elseif ( !$is_packed && $product->getData('shiphawk_type_of_product_value') && $product->getData('shiphawk_type_of_product')){
-                $item_type = 'unpacked';
-            } else {
+            } elseif ($is_packed) {
                 $item_type = $item_weight <= 70 ? 'parcel' : 'handling_unit';
+            } else {
+                $item_type = 'unpacked';
             }
 
             $handling_unit_type = '';
@@ -255,10 +254,7 @@ class ShipHawk_MyCarrier_Model_Carrier
             $value = $product->getData('shiphawk_item_value') ? $product->getData('shiphawk_item_value') : $itemObject->getPrice();
             $quantity = $shiphawk_quantity * $item->getQty();
 
-            $weight = $item_weight;
-            if ($item_type == 'parcel') {
-                $weight *= 16;
-            }
+            $weight = !empty($product->getData("shiphawk_item_weight")) ? (int)$product->getData("shiphawk_item_weight") : $item_weight;
 
             $itemsGrouped[$groupKey]['items'][] = array(
                 'product_sku'           => $product->getData($skuColumn),
@@ -269,11 +265,50 @@ class ShipHawk_MyCarrier_Model_Carrier
                 'height'                => $product->getData('shiphawk_height') ? $product->getData('shiphawk_height') : $itemObject->getHeight(),
                 'freight_class'         => $this->getSelectAttributeValue($product, 'shiphawk_freight_class'),
                 'weight'                => $weight,
-                // 'item_type'             => $item_type,
+                'weight_uom'            => "lbs",
                 'type'                  => $item_type,
                 'handling_unit_type'    => $handling_unit_type,
-                'unpacked_item_type_id' => $product->getData('shiphawk_type_of_product_value')
+                'unpacked_item_type_id' => $product->getData('shiphawk_type_of_product_value'),
+                'require_crating'       => $product->getData('shiphawk_item_req_crating') == 1
             );
+
+            $itemNumbers = [2,3,4,5,6,7,8,9,10];
+            foreach ($itemNumbers as $itemNumber) {
+                if ((int)$product->getData("shiphawk_item_{$itemNumber}_quantity") < 1){
+                    continue;
+                }
+
+
+                $weight = (int)$product->getData("shiphawk_item_{$itemNumber}_weight");
+                $is_packed = ($product->getData('shiphawk_item_{$itemNumber}_is_packed') == 1);
+
+                if ((int)$product->getData("shiphawk_item_{$itemNumber}_length") < 1 && $weight < 1){
+                    continue;
+                }
+
+                if ($send_items_as_unpacked) {
+                    $item_type = 'unpacked';
+                } elseif ($is_packed) {
+                    $item_type = $item_weight <= 70 ? 'parcel' : 'handling_unit';
+                } else {
+                    $item_type = 'unpacked';
+                }
+
+                $itemsGrouped[$groupKey]['items'][] = array(
+                    'quantity'              => $product->getData("shiphawk_item_{$itemNumber}_quantity"),
+                    'value'                 => 0,
+                    'length'                => $product->getData("shiphawk_item_{$itemNumber}_length"),
+                    'width'                 => $product->getData("shiphawk_item_{$itemNumber}_width"),
+                    'height'                => $product->getData("shiphawk_item_{$itemNumber}_height"),
+                    'freight_class'         => $this->getSelectAttributeValue($product, "shiphawk_item_{$itemNumber}_freight_class"),
+                    'weight'                => $weight,
+                    'weight_uom'            => "lbs",
+                    'type'                  => $item_type,
+                    'handling_unit_type'    => $handling_unit_type,
+                    'unpacked_item_type_id' => $product->getData("shiphawk_item_{$itemNumber}_type_id"),
+                    'require_crating'       => $product->getData("shiphawk_item_{$itemNumber}_req_crating") == 1
+                );
+            }
         }
 
         return $itemsGrouped;
