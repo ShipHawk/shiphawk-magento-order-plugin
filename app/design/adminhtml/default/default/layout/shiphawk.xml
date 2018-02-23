@@ -7,8 +7,13 @@
             <action method="addItem">
                 <type>js</type>
                 <name>shiphawk/shiphawk.js</name>
-
                 <aParams>id="shiphawkjsfile"</aParams>
+            </action>
+
+            <action method="addItem">
+                <type>js</type>
+                <name>shiphawk/jquery-3.3.1.min.js</name>
+                <aParams>id="shiphawkjquery"</aParams>
             </action>
 
             <action method="addItem"><type>js_css</type><name>shiphawk/shiphawk.css</name></action>
@@ -30,6 +35,12 @@
             </action>
 
             <action method="addItem">
+                <type>js</type>
+                <name>shiphawk/jquery-3.3.1.min.js</name>
+                <aParams>id="shiphawkjquery"</aParams>
+            </action>
+
+            <action method="addItem">
                 <type>js_css</type>
                 <name>shiphawk/shiphawk.css</name>
             </action>
@@ -47,6 +58,12 @@
                 <type>js</type>
                 <name>shiphawk/shiphawk.js</name>
                 <aParams>id="shiphawkjsfile"</aParams>
+            </action>
+
+            <action method="addItem">
+                <type>js</type>
+                <name>shiphawk/jquery-3.3.1.min.js</name>
+                <aParams>id="shiphawkjquery"</aParams>
             </action>
 
             <action method="addItem">
