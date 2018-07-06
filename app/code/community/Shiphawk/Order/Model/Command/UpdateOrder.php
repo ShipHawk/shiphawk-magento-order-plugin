@@ -12,12 +12,19 @@ class Shiphawk_Order_Model_Command_UpdateOrder
 
         $notes = [];
         foreach ($order->getAllStatusHistory() as $note){
+            if ($note->comment == null) { continue; }
+
             $notes[] = array(
                 'body'       => $note->comment,
                 'created_at' => $note->created_at,
                 'tag'        => 'magento'
             );
         }
+
+        $notes[] = array(
+            'body' => 'Payment type: '.$order->getPayment()->getMethodInstance()->getTitle(),
+            'tag'  => 'magento'
+        );
 
         $orderRequest = json_encode(
             array(
