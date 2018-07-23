@@ -17,8 +17,11 @@ class ShipHawk_MyCarrier_Model_Carrier
 
         foreach( $groupedItems as $key => $data) {
             $destination_address = array(
-                'zip'            =>  $to_zip = $request->getDestPostcode(),
-                'is_residential' =>  'true'
+                'country'        => $request->getDestCountryId(),
+                'zip'            => $request->getDestPostcode(),
+                'city'           => $request->getDestCity(),
+                'state'          => $request->getDestRegionCode(),
+                'is_residential' => 'true'
             );
 
             $rateRequest = array(
@@ -274,7 +277,9 @@ class ShipHawk_MyCarrier_Model_Carrier
 
             $itemNumbers = [2,3,4,5,6,7,8,9,10];
             foreach ($itemNumbers as $itemNumber) {
+                Mage::log('Iterating item number ' . $itemNumber, Zend_Log::INFO, 'shiphawk_rates.log', true);
                 if ((int)$product->getData("shiphawk_item_{$itemNumber}_quantity") < 1){
+                    Mage::log('Skiping by quantity < 1 item number ' . $itemNumber, Zend_Log::INFO, 'shiphawk_rates.log', true);
                     continue;
                 }
 
@@ -283,6 +288,7 @@ class ShipHawk_MyCarrier_Model_Carrier
                 $is_packed = ($product->getData('shiphawk_item_{$itemNumber}_is_packed') == 1);
 
                 if ((int)$product->getData("shiphawk_item_{$itemNumber}_length") < 1 && $weight < 1){
+                    Mage::log('Skiping by no length and weight item number ' . $itemNumber, Zend_Log::INFO, 'shiphawk_rates.log', true);
                     continue;
                 }
 
