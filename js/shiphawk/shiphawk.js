@@ -43,22 +43,31 @@
         }
     }
 
+    function isBulkUpdate() {
+        return window.location.pathname.includes("catalog_product_action_attribute/edit");
+    }
+
     function attachItemTypeSuggestors() {
         shjQuery("input[id^=shiphawk_item_][id$=type], #shiphawk_type_of_product").each(function(i, el){
+            shjQuery(el).attr('placeholder', "... start typing for suggestions");
             var suggestionsContainer = shjQuery("<div class='shiphawk_item_type_suggest'></div>");
             shjQuery(el).after(suggestionsContainer);
 
             shjQuery(suggestionsContainer).on('click', 'li.shiphawk_item_type_label', function(event){
                 var li = shjQuery(event.target);
                 var typeId = li.data('typeId');
-
+                
                 if (shjQuery(el).attr('id') == 'shiphawk_type_of_product') { // Item #1
-                    shjQuery("#shiphawk_type_of_product_value").val(typeId);
+                    var typeIdFieldId = "shiphawk_type_of_product_value";
                 } else {
                     // eg shiphawk_item_2_type_id
-                    shjQuery("#" + shjQuery(el).attr('id') + '_id' ).val(typeId);
+                    var typeIdFieldId = shjQuery(el).attr('id') + '_id';
                 }
-
+                
+                shjQuery("#" + typeIdFieldId).val(typeId);
+                if (isBulkUpdate) {
+                    shjQuery("#" + typeIdFieldId + "-checkbox").click();
+                }
 
                 shjQuery(el).val(li.text());
                 suggestionsContainer.hide();
@@ -91,12 +100,7 @@
         });
     }
 
-    function hideItemTypeIds(){
-        shjQuery("#shiphawk_type_of_product_value, input[id^=shiphawk_item_][id$=_type_id]").parents("tr").hide();
-    }
-
     document.observe("dom:loaded", function() {
-        hideItemTypeIds();
         attachItemTypeSuggestors();
         addSectionTitles();
     });
