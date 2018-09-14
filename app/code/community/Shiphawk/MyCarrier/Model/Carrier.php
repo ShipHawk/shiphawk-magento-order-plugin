@@ -257,7 +257,8 @@ class ShipHawk_MyCarrier_Model_Carrier
             $value = $product->getData('shiphawk_item_value') ? $product->getData('shiphawk_item_value') : $itemObject->getPrice();
             $quantity = $shiphawk_quantity * $item->getQty();
 
-            $weight = !empty($product->getData("shiphawk_item_weight")) ? (int)$product->getData("shiphawk_item_weight") : $item_weight;
+            $shiphawk_item_weight = $product->getData("shiphawk_item_weight");
+            $weight = !empty($shiphawk_item_weight) ? (int)$product->getData("shiphawk_item_weight") : $item_weight;
 
             $itemsGrouped[$groupKey]['items'][] = array(
                 'product_sku'           => $product->getData($skuColumn),
