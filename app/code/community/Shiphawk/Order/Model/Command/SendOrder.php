@@ -86,6 +86,7 @@ class Shiphawk_Order_Model_Command_SendOrder
                 'order_number' => $order->getIncrementId(),
                 'source' => 'magento',
                 'source_system' => 'magento',
+                'source_system_domain' => Mage::getBaseUrl(Mage_Core_Model_Store::URL_TYPE_WEB),
                 'source_system_id' => $order->getEntityId(),
                 'source_system_processed_at' => $order->getCreatedAt(),
                 'requested_rate_id' => $shippingRateId,
