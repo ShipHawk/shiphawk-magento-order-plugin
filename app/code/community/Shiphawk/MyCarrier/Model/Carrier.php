@@ -15,12 +15,18 @@ class ShipHawk_MyCarrier_Model_Carrier
 
         $rateResponsesArray = array();
 
+        $split_full_street = $arr = explode("\n", $request->getDestStreet());
+        $street1 = $split_full_street[0];
+        $street2 = $split_full_street[1];
+
         foreach( $groupedItems as $key => $data) {
             $destination_address = array(
                 'country'        => $request->getDestCountryId(),
                 'zip'            => $request->getDestPostcode(),
                 'city'           => $request->getDestCity(),
                 'state'          => $request->getDestRegionCode(),
+                'street1'        => $street1,
+                'street2'        => $street2,
                 'is_residential' => 'true'
             );
 
