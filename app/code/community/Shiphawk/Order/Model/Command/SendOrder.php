@@ -16,9 +16,8 @@ class Shiphawk_Order_Model_Command_SendOrder
         $shippingRateId = '';
 
         Mage::log('rates array:...');
-        Mage::log(Mage::getSingleton('core/session')->getSHRateAarray());
-
         $SHRates = Mage::getSingleton('core/session')->getSHRateAarray();
+        Mage::log($SHRates);
 
         foreach($SHRates as $rateRow){
             $sh_service_title = $rateRow->service_name;
