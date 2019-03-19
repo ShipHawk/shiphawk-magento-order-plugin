@@ -396,16 +396,7 @@ class ShipHawk_MyCarrier_Model_Carrier
 
     protected function getTotalPriceFromDetailedResponse($shRate)
     {
-        $priceDetails = $shRate->rate_detail->proposed_shipments[0]->price_details;
-
-        $totalPrice = $priceDetails->shipping;
-        $totalPrice += $priceDetails->packing;
-        $totalPrice += $priceDetails->insurance;
-        $totalPrice += $priceDetails->accessorials;
-        $totalPrice += $priceDetails->duties;
-        $totalPrice += $priceDetails->taxes;
-
-        return $totalPrice;
+        return $shRate->rate_detail->proposed_shipments[0]->total_price;
     }
 
 
