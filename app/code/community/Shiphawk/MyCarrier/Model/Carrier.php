@@ -57,13 +57,12 @@ class ShipHawk_MyCarrier_Model_Carrier
             $combinedRate = $this->_buildCombinedRate();
 
             foreach ( $rateResponsesArray as $rateResponse ) {
-                if($rateResponse && $rateResponse['response'] && $rateResponse['response']->isSuccessful()) {
-                    $rate = json_decode($rateResponse['response']->getBody())->rates[0];
+                if($this->_isValidRateResponse($rateResponse)) {
+                    $rate = $this->_getRates($rateResponse)->rates[0];
                     $partialRatesArray[] = $rate;
 
                     // apply markup to the single rate
-                    $price = $this->getTotalPriceFromDetailedResponse($rate);
-                    $price = $this->shippingPriceWithMarkup($price, $rateResponse['data']['flat_markup'], $rateResponse['data']['percent_markup']);
+                    $price = $this->_getShippingPriceWithMarkup($rate, $rateResponse);
 
                     $combinedRate->price += $price;
                     $combinedRate->id[] = $rate->id;
@@ -76,14 +75,14 @@ class ShipHawk_MyCarrier_Model_Carrier
             }
         } else {
             $rateResponse = $rateResponsesArray[0];
-            if($rateResponse && $rateResponse['response'] && $rateResponse['response']->isSuccessful()) {
-                $rateArray = json_decode($rateResponse['response']->getBody());
+            
+            if($this->_isValidRateResponse($rateResponse)) {
+                $rateArray = $this->_getRates($rateResponse);
 
                 // apply markup to the rates
                 foreach ($rateArray->rates as $rate)
                 {
-                    $price = $this->getTotalPriceFromDetailedResponse($rate);
-                    $rate->price = $this->shippingPriceWithMarkup($price, $rateResponse['data']['flat_markup'], $rateResponse['data']['percent_markup']);
+                    $rate->price = $this->_getShippingPriceWithMarkup($rate, $rateResponse);
                 }
             }
         }
@@ -396,9 +395,8 @@ class ShipHawk_MyCarrier_Model_Carrier
 
     protected function getTotalPriceFromDetailedResponse($shRate)
     {
-        return $shRate->rate_detail->proposed_shipments[0]->total_price;
+        return floatval($shRate->price);
     }
-
 
     public function getAllowedMethods()
     {
@@ -773,5 +771,21 @@ class ShipHawk_MyCarrier_Model_Carrier
           'Watkins and Shepard - Premium'                                            => 'Watkins and Shepard - Premium',
           'Multiple Carriers'                                                        => 'Multiple Carriers'
         );
+    }
+
+    private function _isValidRateResponse($rateResponse)
+    {
+        return $rateResponse && $rateResponse['response'] && $rateResponse['response']->isSuccessful();
+    }
+
+    private function _getShippingPriceWithMarkup($rate, $rateResponse)
+    {
+        $price = $this->getTotalPriceFromDetailedResponse($rate);
+        return $this->shippingPriceWithMarkup($price, $rateResponse['data']['flat_markup'], $rateResponse['data']['percent_markup']);
+    }
+
+    private function _getRates($rateResponse)
+    {
+        return json_decode($rateResponse['response']->getBody());
     }
 }
