@@ -4,8 +4,15 @@ class Shiphawk_Order_Model_Command_CheckConfiguration
 {
     public function execute()
     {
+        $mode = Mage::getStoreConfig('shiphawk/order/gateway_mode');
         $url = Mage::getStoreConfig('shiphawk/order/gateway_url');
         $key = Mage::getStoreConfig('shiphawk/order/api_key');
+
+        if ($mode != 'custom_gateway') {
+            Mage::getConfig()->saveConfig('shiphawk/order/gateway_url', $mode);
+            $url = $mode;
+        }
+        
         $client = new Zend_Http_Client($url . 'user');
         $client->setHeaders('X-Api-Key', $key);
 
