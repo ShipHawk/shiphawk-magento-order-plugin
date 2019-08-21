@@ -190,16 +190,29 @@ class ShipHawk_MyCarrier_Model_Carrier
         $send_items_as_unpacked = Mage::getStoreConfig('carriers/shiphawk_mycarrier/send_items_as_unpacked');
 
         foreach ($request->getAllItems() as $item) {
-            if ($item->getProduct()->isVirtual() || $item->getParentItem()) {
-              continue;
+            if (($item->getProduct()->isVirtual() || ($item->getProductType() == 'bundle'))) {
+                continue;
+            }
+            // Sku will be equals to Bundle Product SKU or dynamic in selected Simple Products from Bundle.
+            // To get Sku of selected Simple Products of Bundle we can use getTypeInstance methods
+            // Also getTypeInstance->getSku returns correct Sku in case of Grouped and Configurable Products
+
+            $simpleProductSku = $item->getProduct()->getTypeInstance(true)->getSku($item);
+
+            // For Configurable Products actual Qty and Price will be in Parent Quote Item.
+            // So if Item has parentItemId and Parent Item Product is Configurable Product - skip this item
+            // for Bundle and Grouped Products we can use current Quote Item ($item) for actual Qty and Price.
+
+            if ($item->getParentItemId()) {
+                $options = $item->getProduct()->getTypeInstance(true)->getOrderOptions($item->getProduct());
+                $parentProductId = $options['info_buyRequest']['product'];
+                $parentProduct = Mage::getModel('catalog/product')->load($parentProductId);
+                $parentProductType = $parentProduct->getTypeId();
+
+                if ($parentProductType == 'configurable') { continue; }
             }
 
-            if($option = $item->getOptionByCode('simple_product')) {
-                $itemObject = $option;
-            } else if( $item->getTypeId() != 'configurable' && !$item->getParentItemId() ){
-                $itemObject = $item;
-            }
-
+            $itemObject = $item;
             $product_id = $itemObject->getProductId();
             $product = Mage::getModel('catalog/product')->load($product_id);
 
@@ -259,14 +272,14 @@ class ShipHawk_MyCarrier_Model_Carrier
                 $shiphawk_quantity = intval($product->getData('shiphawk_quantity'));
             }
 
-            $value = $product->getData('shiphawk_item_value') ? $product->getData('shiphawk_item_value') : $itemObject->getPrice();
+            $value = $product->getData('shiphawk_item_value') ? $product->getData('shiphawk_item_value') : $item->getBasePrice();
             $quantity = $shiphawk_quantity * $item->getQty();
 
             $shiphawk_item_weight = $product->getData("shiphawk_item_weight");
             $weight = !empty($shiphawk_item_weight) ? (int)$product->getData("shiphawk_item_weight") : $item_weight;
 
             $itemsGrouped[$groupKey]['items'][] = array(
-                'product_sku'           => $product->getData($skuColumn),
+                'product_sku'           => $simpleProductSku,
                 'quantity'              => $quantity,
                 'value'                 => $value,
                 'length'                => $product->getData('shiphawk_length') ? $product->getData('shiphawk_length') : $itemObject->getLength(),
