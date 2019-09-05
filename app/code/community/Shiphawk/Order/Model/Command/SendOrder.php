@@ -33,6 +33,7 @@ class Shiphawk_Order_Model_Command_SendOrder
         $skuColumn = Mage::getStoreConfig('shiphawk/datamapping/sku_column');
         $SimpleItems = array();
         foreach($order->getAllVisibleItems() as $item){
+
             if($item->getHasChildren()) {
                 foreach($item->getChildrenItems() as $child) {
                     $SimpleItems[] = $child;
@@ -64,6 +65,13 @@ class Shiphawk_Order_Model_Command_SendOrder
                 $handling_unit_type = 'box';
             }
 
+            if ($item->getParentItemId()) {
+              $source_system_id = $item->getParentItemId();
+            } else {
+              $source_system_id = $item->getItemId();
+            }
+
+
             $itemsRequest[] = array(
                 'name' => $item->getName(),
                 'sku' => $product->getData($skuColumn),
@@ -76,7 +84,7 @@ class Shiphawk_Order_Model_Command_SendOrder
                 'can_ship_parcel' => true,
                 'item_type' => $item_type,
                 'handling_unit_type' => $handling_unit_type,
-                'source_system_id' => $item->getItemId()
+                'source_system_id' => $source_system_id,
             );
         }
 
