@@ -75,7 +75,7 @@ class ShipHawk_MyCarrier_Model_Carrier
             }
         } else {
             $rateResponse = $rateResponsesArray[0];
-            
+
             if($this->_isValidRateResponse($rateResponse)) {
                 $rateArray = $this->_getRates($rateResponse);
 
@@ -249,7 +249,6 @@ class ShipHawk_MyCarrier_Model_Carrier
                 $item_type = 'unpacked';
             }
 
-            $handling_unit_type = '';
             if ($item_type == 'handling_unit'){
                 $handling_unit_type = 'box';
             }
@@ -264,8 +263,7 @@ class ShipHawk_MyCarrier_Model_Carrier
 
             $shiphawk_item_weight = $product->getData("shiphawk_item_weight");
             $weight = !empty($shiphawk_item_weight) ? (int)$product->getData("shiphawk_item_weight") : $item_weight;
-
-            $itemsGrouped[$groupKey]['items'][] = array(
+            $newItem = array(
                 'product_sku'           => $product->getData($skuColumn),
                 'quantity'              => $quantity,
                 'value'                 => $value,
@@ -276,10 +274,16 @@ class ShipHawk_MyCarrier_Model_Carrier
                 'weight'                => $weight,
                 'weight_uom'            => "lbs",
                 'type'                  => $item_type,
-                'handling_unit_type'    => $handling_unit_type,
                 'unpacked_item_type_id' => $product->getData('shiphawk_type_of_product_value'),
                 'require_crating'       => $product->getData('shiphawk_item_req_crating') == 1
             );
+
+
+            if (isset($handling_unit_type)) {
+                $newItem['handling_unit_type'] = $handling_unit_type;
+            }
+
+            $itemsGrouped[$groupKey]['items'][] = $newItem;
 
             $itemNumbers = [2,3,4,5,6,7,8,9,10];
             foreach ($itemNumbers as $itemNumber) {
@@ -306,7 +310,7 @@ class ShipHawk_MyCarrier_Model_Carrier
                     $item_type = 'unpacked';
                 }
 
-                $itemsGrouped[$groupKey]['items'][] = array(
+                $newItem = array(
                     'quantity'              => $product->getData("shiphawk_item_{$itemNumber}_quantity"),
                     'value'                 => 0,
                     'length'                => $product->getData("shiphawk_item_{$itemNumber}_length"),
@@ -316,10 +320,15 @@ class ShipHawk_MyCarrier_Model_Carrier
                     'weight'                => $weight,
                     'weight_uom'            => "lbs",
                     'type'                  => $item_type,
-                    'handling_unit_type'    => $handling_unit_type,
                     'unpacked_item_type_id' => $product->getData("shiphawk_item_{$itemNumber}_type_id"),
                     'require_crating'       => $product->getData("shiphawk_item_{$itemNumber}_req_crating") == 1
                 );
+
+                if (isset($handling_unit_type)) {
+                    $newItem['handling_unit_type'] = $handling_unit_type;
+                }
+
+                $itemsGrouped[$groupKey]['items'][] = $newItem;
             }
         }
 
