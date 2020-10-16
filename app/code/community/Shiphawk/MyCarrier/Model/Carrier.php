@@ -253,7 +253,6 @@ class ShipHawk_MyCarrier_Model_Carrier
                 $handling_unit_type = 'box';
             }
 
-
             $shiphawk_quantity = 1;
             if (intval($product->getData('shiphawk_quantity'))>0) {
                 $shiphawk_quantity = intval($product->getData('shiphawk_quantity'));
@@ -264,7 +263,6 @@ class ShipHawk_MyCarrier_Model_Carrier
 
             $shiphawk_item_weight = $product->getData("shiphawk_item_weight");
             $weight = !empty($shiphawk_item_weight) ? (int)$product->getData("shiphawk_item_weight") : $item_weight;
-
             $newItem = array(
                 'product_sku'           => $product->getData($skuColumn),
                 'quantity'              => $quantity,
@@ -277,17 +275,13 @@ class ShipHawk_MyCarrier_Model_Carrier
                 'weight_uom'            => "lbs",
                 'type'                  => $item_type,
                 'unpacked_item_type_id' => $product->getData('shiphawk_type_of_product_value'),
-                'require_crating'       => $product->getData('shiphawk_item_req_crating') == 1,
-                'is_packed' => $product->getData('shiphawk_item_is_packed'),
-                'is_packed_s' => $is_packed,
-                'item_weight' => $item_weight,
-                's_weight' => $shiphawk_item_weight
+                'require_crating'       => $product->getData('shiphawk_item_req_crating') == 1
             );
 
-            if ( isset($handling_unit_type) ) {
+
+            if (isset($handling_unit_type)) {
                 $newItem['handling_unit_type'] = $handling_unit_type;
             }
-
 
             $itemsGrouped[$groupKey]['items'][] = $newItem;
 
@@ -330,7 +324,7 @@ class ShipHawk_MyCarrier_Model_Carrier
                     'require_crating'       => $product->getData("shiphawk_item_{$itemNumber}_req_crating") == 1
                 );
 
-                if ( isset($handling_unit_type) ) {
+                if (isset($handling_unit_type)) {
                     $newItem['handling_unit_type'] = $handling_unit_type;
                 }
 
@@ -339,6 +333,7 @@ class ShipHawk_MyCarrier_Model_Carrier
         }
 
         return $itemsGrouped;
+
     }
 
     public function getProductCarrierType($product) {
