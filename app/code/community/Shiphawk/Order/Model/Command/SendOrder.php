@@ -71,12 +71,13 @@ class Shiphawk_Order_Model_Command_SendOrder
               $source_system_id = $item->getItemId();
             }
 
+            $value = $product->getData('shiphawk_item_value') ? $product->getData('shiphawk_item_value') : $product->getFinalPrice();
 
             $itemsRequest[] = array(
                 'name' => $item->getName(),
                 'sku' => $product->getData($skuColumn),
                 'quantity' => $item->getQtyOrdered(),
-                'value' => $item->getPrice(),
+                'value' => $value,
                 'length' => $item->getLength(),
                 'width' => $item->getWidth(),
                 'height' => $item->getHeight(),
