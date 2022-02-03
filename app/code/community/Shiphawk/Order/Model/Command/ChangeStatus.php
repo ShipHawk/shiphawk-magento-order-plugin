@@ -15,7 +15,7 @@ class Shiphawk_Order_Model_Command_ChangeStatus
                 'source_system' => 'magento',
                 'source_system_id' => $order->getEntityId(),
                 'source_system_processed_at' => '',
-                'canceled_at' => $order->getUpdatedAt(),
+                'cancelled_at' => $order->getUpdatedAt(),
                 'status' => Mage::getSingleton('shiphawk_order/statusMapper')->map($order->getStatus()),
             )
         );

@@ -11,8 +11,12 @@ class Shiphawk_Order_Model_StatusMapper
                 return 'shipped';
             case 'processing':
                 return 'partially_shipped';
-            default:
+            case 'holded':
+                return 'on_hold';
+            case 'pending':
                 return 'new';
+            default:
+                return $status;
         }
     }
 }
