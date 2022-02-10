@@ -258,7 +258,7 @@ class ShipHawk_MyCarrier_Model_Carrier
                 $shiphawk_quantity = intval($product->getData('shiphawk_quantity'));
             }
 
-            $value = $product->getData('shiphawk_item_value') ? $product->getData('shiphawk_item_value') : $item->getPrice();
+            $value = $product->getData('shiphawk_item_value') ? $product->getData('shiphawk_item_value') : $product->getFinalPrice();
             $quantity = $shiphawk_quantity * $item->getQty();
 
             $shiphawk_item_weight = $product->getData("shiphawk_item_weight");
